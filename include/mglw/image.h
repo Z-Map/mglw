@@ -6,14 +6,14 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 15:03:37 by qloubier          #+#    #+#             */
-/*   Updated: 2017/01/23 12:21:07 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/03/06 14:34:18 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MGLW_IMAGE_H
-#define MGLW_IMAGE_H
+# define MGLW_IMAGE_H
 
-#include "mglw/mglw_header.h"
+# include "mglw/mglw_header.h"
 
 /* MiniGLwin image management  */
 

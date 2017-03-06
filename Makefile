@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/03/02 16:07:47 by qloubier         ###   ########.fr        #
+#    Updated: 2017/03/06 14:51:04 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,7 +15,7 @@ NAME		= libmglw.a
 LINKNAME	= mglw
 PROJECTNAME	= mglw
 SILENT		= @
-CFLAGS		= #-Wall -Werror -Wextra
+CFLAGS		= -Wall -Werror -Wextra
 
 ifndef CC
   CC=clang
@@ -34,10 +34,10 @@ ifeq ($(config),release)
 endif
 
 
-INCDIR=-Iinclude -Isrc/include -I$(LIBDIR)/glfw/include -I$(LIBDIR)/glload/include
-LIBDIR=lib
-BUILDDIR=build
-SRCDIR=src
+INCDIR	=-Iinclude -Isrc/include -I$(LIBDIR)/glfw/include -I$(LIBDIR)/glload/include
+LIBDIR	=lib
+BUILDDIR=build/$(config)
+SRCDIR	=src
 
 SRCS	=\
 	system.c\
@@ -57,16 +57,12 @@ SRCS	=\
 	image_loader.c\
 	error.c\
 	mgl/shaders.c\
-	mgl/strings/atlas.c\
-	mgl/strings/fromttf.c
 
 SHADERS	= pixelbox.vert pixelbox.frag\
 
-TESTSRC	= test/movesquare.c\
-		test/font.c
-
 OBJ=$(subst /,~,$(SRCS:%.c=%.o))
 
+# Intern vars
 INTERN_SRCS	= $(SRCS:%=$(SRCDIR)/%)
 INTERN_OBJ	= $(OBJ:%=$(BUILDDIR)/mglw_%)
 INTERN_DEP	= $(INTERN_OBJ:%.o=%.d)
@@ -81,16 +77,14 @@ ifeq ($(OPSYS),Linux)
   GLLOAD_OBJ += $(BUILDDIR)/glx_load.o $(BUILDDIR)/glx_load_cpp.o
 endif
 
-.PHONY: all clean fclean re $(TESTSRC) include/mglw_keys.h $(INTERN_DEP)
+.PHONY: all clean fclean re $(TESTSRC) include/mglw_keys.h $(INTERN_DEP) shaders
 
 all: $(NAME)
 
-include/mglw_keys.h: glfw/include/GLFW/glfw3.h Makefile
-	printf "#ifndef MGLW_KEYS_H\n# define MGLW_KEYS_H\n\n" > include/mglw_keys.h
-	cat glfw/include/GLFW/glfw3.h | grep "#define GLFW_KEY" | sed "s/GLFW/MGLW/" >> include/mglw_keys.h
-	printf "\n#endif\n" >> include/mglw_keys.h
+shaders:
+	$(SILENT)$(MAKE) -s $(INTERN_SHA)
 
-$(INTERN_SHA): %.h: % Makefile
+$(INTERN_SHA): %.h: %
 	@printf "\e[33mShader $<\e[31m\e[80D"
 	$(SILENT)printf "(const char[]){" > $@
 	$(SILENT)xxd -i $< | grep -x "[0-9a-fx, ]*" $(INTERN_SHADERCOMAND) >> $@
@@ -100,16 +94,13 @@ $(INTERN_SHA): %.h: % Makefile
 $(BUILDDIR):
 	$(SILENT)mkdir -p $(BUILDDIR)
 
-$(BUILDDIR)/Makefile:
-	$(SILENT)cd build && cmake ../$(LIBDIR)/glfw
-
-$(BUILDDIR)/src/libglfw3.a: $(BUILDDIR)/Makefile
+$(BUILDDIR)/libglfw3.a:
 	$(SILENT)$(MAKE) -s -C $(BUILDDIR)
 
 $(GLLOAD_OBJ):
 	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload $(CURDIR)/$@ BUILDDIR=$(CURDIR)/$(BUILDDIR) config=$(config)
 
-$(NAME): $(BUILDDIR) $(INTERN_SHA) $(BUILDDIR)/src/libglfw3.a $(INTERN_OBJ) $(GLLOAD_OBJ) Makefile
+$(NAME): $(BUILDDIR) $(INTERN_SHA) $(BUILDDIR)/libglfw3.a $(INTERN_OBJ) $(GLLOAD_OBJ)
 ifeq ($(BOBJ_GUARD),off)
 	$(SILENT)$(MAKE) -s $(NAME) BOBJ_GUARD=on
 else
@@ -144,14 +135,3 @@ fclean: clean
 	$(SILENT)rm -f $(NAME)
 
 re: fclean all
-
-$(TESTSRC):
-ifeq ($(OPSYS),Linux)
-	$(CC) -o test_mglw $@ $(CFLAGS) $(INCDIR) -L./ -lGL $(shell pkg-config --static --libs mglw.pc)
-else
-	$(CC) -o test_mglw $@ $(CFLAGS) $(INCDIR) -L./ -lmglw $(OSXLIBS)
-endif
-	./test_mglw
-
-test: $(NAME)
-	$(MAKE) $(TESTSRC)

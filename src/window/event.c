@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 21:59:43 by map               #+#    #+#             */
-/*   Updated: 2017/02/26 16:23:47 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/03/06 14:27:51 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,6 @@ void		MGLWmouseprocess(GLFWwindow* window, double xpos, double ypos)
 	mglw_wd *const	wdata = (mglw_wd *)glfwGetWindowUserPointer(window);
 	int				(*mcb)(void *, double, double) = wdata->mcb[0];
 
-	// printf("move %f, %f\n", xpos, ypos);
 	if (mcb)
 		mcb(wdata->mcb_args[0], xpos, ypos);
 }
@@ -100,7 +99,6 @@ void		MGLWmousewheelprocess(GLFWwindow* window, double xpos, double ypos)
 	mglw_wd *const	wdata = (mglw_wd *)glfwGetWindowUserPointer(window);
 	int				(*mcb)(void *, double, double) = wdata->mcb[1];
 
-	// printf("wheel %f, %f\n", xpos, ypos);
 	if (mcb)
 		mcb(wdata->mcb_args[1], xpos, ypos);
 }
