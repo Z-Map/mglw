@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/03/06 14:51:04 by qloubier         ###   ########.fr        #
+#    Updated: 2017/03/08 14:29:26 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -14,30 +14,32 @@ OPSYS		= $(shell uname -s)
 NAME		= libmglw.a
 LINKNAME	= mglw
 PROJECTNAME	= mglw
+PROJECTPATH	= $(CURDIR)
 SILENT		= @
 CFLAGS		= -Wall -Werror -Wextra
 
 ifndef CC
-  CC=clang
+	CC=clang
 endif
 
 ifndef config
-  config=release
+	config	= release
 endif
 ifeq ($(config),debug)
-  CFLAGS+=-g -fsanitize=address
-  LIBSUFIX=D
+	CFLAGS	+= -g -fsanitize=address
+	LIBSUFIX= D
 endif
 ifeq ($(config),release)
-  CFLAGS+=-Ofast
-  LIBSUFIX=
+	CFLAGS	+= -Ofast
+	LIBSUFIX=
 endif
 
 
-INCDIR	=-Iinclude -Isrc/include -I$(LIBDIR)/glfw/include -I$(LIBDIR)/glload/include
-LIBDIR	=lib
-BUILDDIR=build/$(config)
-SRCDIR	=src
+INCDIR		= -Iinclude -Isrc/include -I$(LIBDIR)/glfw/include -I$(LIBDIR)/glload/include
+LIBDIR		= lib
+BUILDDIR	= build/$(config)
+TARGETDIR	= .
+SRCDIR		= src
 
 SRCS	=\
 	system.c\
@@ -73,8 +75,8 @@ OSXLIBS		= -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVi
 GLLOAD_OBJ	= $(BUILDDIR)/gl_load.o $(BUILDDIR)/gl_load_cpp.o
 INTERN_SHADERCOMAND=
 ifeq ($(OPSYS),Linux)
-	INTERN_SHADERCOMAND+=| head -c -1 | tail -c +3
-  GLLOAD_OBJ += $(BUILDDIR)/glx_load.o $(BUILDDIR)/glx_load_cpp.o
+	INTERN_SHADERCOMAND += | head -c -1 | tail -c +3
+	GLLOAD_OBJ += $(BUILDDIR)/glx_load.o $(BUILDDIR)/glx_load_cpp.o
 endif
 
 .PHONY: all clean fclean re $(TESTSRC) include/mglw_keys.h $(INTERN_DEP) shaders
@@ -95,36 +97,33 @@ $(BUILDDIR):
 	$(SILENT)mkdir -p $(BUILDDIR)
 
 $(BUILDDIR)/libglfw3.a:
-	$(SILENT)$(MAKE) -s -C $(BUILDDIR)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) TARGETDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
 
 $(GLLOAD_OBJ):
-	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload $(CURDIR)/$@ BUILDDIR=$(CURDIR)/$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload objects BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
 
-$(NAME): $(BUILDDIR) $(INTERN_SHA) $(BUILDDIR)/libglfw3.a $(INTERN_OBJ) $(GLLOAD_OBJ)
+$(NAME): $(BUILDDIR) $(BUILDDIR)/libglfw3.a $(GLLOAD_OBJ) $(INTERN_OBJ) $(INTERN_SHA)
 ifeq ($(BOBJ_GUARD),off)
 	$(SILENT)$(MAKE) -s $(NAME) BOBJ_GUARD=on
 else
-	$(SILENT)cp $(BUILDDIR)/src/libglfw3.a ./$(NAME)
+	$(SILENT)cp $(BUILDDIR)/libglfw3.a $(TARGETDIR)/$(NAME)
 	$(SILENT)ar -rcs $(NAME) $(ALLOBJ) $(GLLOAD_OBJ)
-	$(SILENT)sed "s/-lglfw3/-l$(LINKNAME)/" $(BUILDDIR)/src/glfw3.pc > ./$(LINKNAME).pc
 	@printf "\e[m[\e[32mok\e[m] \e[35m$@\e[m compiled !\e(B\e[m\n"
 endif
 
-$(INTERN_OBJ): Makefile
+$(INTERN_OBJ):
 ifeq ($(BOBJ_GUARD),on)
 	@printf "\e[33mCompile $@\e[31m\e[80D"
 	$(SILENT)$(CC) -MMD -MP $(CFLAGS) $(INCDIR) -o $@ -c $(subst ~,/,$(@:$(BUILDDIR)/mglw_%.o=$(SRCDIR)/%.c))
 	@printf "\e[m[\e[32mok\e[m] \e[35m$@\e[m compiled !\e(B\e[m\n"
-else
-	@echo "$<"
 endif
 
 -include $(INTERN_DEP)
 
 libclean:
 	@printf "\e[31mCleaning lib files ...\e(B\e[m\n"
-	$(SILENT)rm -rf $(BUILDDIR)/src/libglfw3.a
-	$(SILENT)rm -rf $(BUILDDIR)/libglload.a $(BUILDDIR)/gl_load*.o $(BUILDDIR)/glx_load*.o
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw fclean BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) TARGETDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload clean BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
 
 clean:
 	@printf "\e[31mCleaning compile files ...\e(B\e[m\n"
