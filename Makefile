@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/03/08 14:29:26 by qloubier         ###   ########.fr        #
+#    Updated: 2017/03/11 18:57:09 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -37,7 +37,7 @@ endif
 
 INCDIR		= -Iinclude -Isrc/include -I$(LIBDIR)/glfw/include -I$(LIBDIR)/glload/include
 LIBDIR		= lib
-BUILDDIR	= build/$(config)
+BUILDDIR	= $(PROJECTPATH)/build/$(config)
 TARGETDIR	= .
 SRCDIR		= src
 
@@ -97,10 +97,10 @@ $(BUILDDIR):
 	$(SILENT)mkdir -p $(BUILDDIR)
 
 $(BUILDDIR)/libglfw3.a:
-	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) TARGETDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw BUILDDIR=$(BUILDDIR) TARGETDIR=$(BUILDDIR) config=$(config)
 
 $(GLLOAD_OBJ):
-	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload objects BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload objects BUILDDIR=$(BUILDDIR) config=$(config)
 
 $(NAME): $(BUILDDIR) $(BUILDDIR)/libglfw3.a $(GLLOAD_OBJ) $(INTERN_OBJ) $(INTERN_SHA)
 ifeq ($(BOBJ_GUARD),off)
@@ -122,8 +122,8 @@ endif
 
 libclean:
 	@printf "\e[31mCleaning lib files ...\e(B\e[m\n"
-	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw fclean BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) TARGETDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
-	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload clean BUILDDIR=$(PROJECTPATH)/$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glfw fclean BUILDDIR=$(BUILDDIR) TARGETDIR=$(BUILDDIR) config=$(config)
+	$(SILENT)$(MAKE) -s -C $(LIBDIR)/glload clean BUILDDIR=$(BUILDDIR) config=$(config)
 
 clean:
 	@printf "\e[31mCleaning compile files ...\e(B\e[m\n"
