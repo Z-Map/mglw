@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 01:55:52 by map               #+#    #+#             */
-/*   Updated: 2016/12/21 15:31:03 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/01 05:06:34 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,15 @@
 #pragma GCC diagnostic ignored "-Wmisleading-indentation"
 #endif
 #pragma GCC diagnostic ignored "-Wshift-negative-value"
+#pragma GCC diagnostic ignored "-Wpadded"
 #define STBI_ONLY_JPEG
 #define STBI_ONLY_PNG
 #define STBI_ONLY_BMP
 #define STB_IMAGE_IMPLEMENTATION
 #include "hlib/stb_image.h"
 #pragma GCC diagnostic pop
+
+// comment
 
 mglimg		*mglw_loadimage(const char *filename, mglw_if flags, int n)
 {
