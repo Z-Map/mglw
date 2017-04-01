@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 21:24:32 by map               #+#    #+#             */
-/*   Updated: 2017/03/03 17:56:51 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/01 05:05:22 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void		MGLWclearer_legacy(mglwin *win)
 
 void		MGLWimagedraw_legacy(mglwin *win, mglimg *img, int x, int y)
 {
-	static mglsha	shr = (mglsha){ 0, 0, 0, NULL, NULL};
+	static mglsha	shr = (mglsha){ 0, 0, 0, 0, NULL, NULL};
 	GLint			loc;
 
 	if (!win || !img)

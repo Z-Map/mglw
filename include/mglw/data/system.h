@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 14:01:01 by qloubier          #+#    #+#             */
-/*   Updated: 2016/12/21 14:09:56 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/01 00:42:34 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ struct			miniGLwin_system
 	int			padding;
 	mglwin		*wlst;
 	mglimg		*ilst;
-	int			settings[MGLWS_LENGHT + 1];
+	int			settings[MGLWS_LENGHT + ((MGLWS_LENGHT & 1) ? 1 : 2)];
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/19 20:19:31 by qloubier          #+#    #+#             */
-/*   Updated: 2016/12/20 18:01:04 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/01 05:04:19 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,7 @@ typedef struct				mgl_shader
 	GLuint					id;
 	GLuint					vshid;
 	GLuint					fshid;
+	unsigned int			padding;
 	const char				*vsh;
 	const char				*fsh;
 }							mglsha;
