@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/04/01 20:22:20 by qloubier         ###   ########.fr        #
+#    Updated: 2017/04/02 18:27:47 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -104,7 +104,7 @@ else
 	cocoa_monitor.m\
 	cocoa_window.m\
 	nsgl_context.m
-  CFLAGS		+= -Wno-deprecated-declarations
+  LIB_CFLAGS		+= -Wno-deprecated-declarations -Wno-pointer-sign
   INT_STATIC_LF	= $(OSXLIBS)
 endif
 
@@ -142,7 +142,7 @@ INT_MOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_MSRCS:%.m=%.o)))
 INT_ALLOBJ	= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ) $(INT_MGLWOBJ)
 
 INT_CFLAG	= $(CFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
-INT_LCFLAG	= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
+INT_LCFLAG	= $(CFLAGS) $(LIB_CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 INT_CXXFLAG	= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 
 INT_DEP		= $(INT_ALLOBJ:%.o=%.d)
@@ -199,7 +199,7 @@ endif
 $(INT_MOBJ):
 ifeq ($(BOBJ_GUARD),on)
 	@printf "\e[33mCompile $(notdir $@)\e[31m\e[80D"
-	$(SILENT)$(CC) -MMD -MP $(INT_CFLAG) -o $@ -c $(subst ~,/,$(@:$(INT_BD)/%.o=%.m))
+	$(SILENT)$(CC) -MMD -MP $(INT_LCFLAG) -o $@ -c $(subst ~,/,$(@:$(INT_BD)/%.o=%.m))
 	@printf "\e[80D%-79.79b \e[m[\e[32mok\e[m]\n" "\e[35m$(notdir $@)\e[m compiled !\e(B\e[m"
 endif
 
