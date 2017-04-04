@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/04/02 18:27:47 by qloubier         ###   ########.fr        #
+#    Updated: 2017/04/04 18:06:43 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,7 @@ SRCS			=\
 	image_loader.c\
 	error.c\
 	mgl/shaders.c\
+	mgl/strings/fromttf.c\
 
 SHADERS			= pixelbox.vert pixelbox.frag\
 
@@ -104,7 +105,7 @@ else
 	cocoa_monitor.m\
 	cocoa_window.m\
 	nsgl_context.m
-  LIB_CFLAGS		+= -Wno-deprecated-declarations -Wno-pointer-sign
+  LIB_CFLAGS	+= -Wno-deprecated-declarations -Wno-pointer-sign
   INT_STATIC_LF	= $(OSXLIBS)
 endif
 
@@ -121,50 +122,53 @@ endif
 BUILDDIR		= build/$(config)
 
 # Intern vars
-INT_BD		= $(PROJECTPATH)/$(BUILDDIR)
+INT_BD			= $(PROJECTPATH)/$(BUILDDIR)
 
-INT_INCFLAGS = $(INCDIR:%=-I%)\
+INT_INCFLAGS	= $(INCDIR:%=-I%)\
 	$(INCDIR_SHADERS:%=-I%)\
 	$(INCDIR_GLLOAD:%=-I%)\
 	$(INCDIR_GLFW:%=-I%)
 
-INT_LSRCS 	= $(SRCS_GLLOAD:%=$(SRCDIR_GLLOAD)/%) $(SRCS_GLFW:%=$(SRCDIR_GLFW)/%)
+INT_LSRCS 		= $(SRCS_GLLOAD:%=$(SRCDIR_GLLOAD)/%)\
+				$(SRCS_GLFW:%=$(SRCDIR_GLFW)/%)
 
-INT_CSRCS	= $(filter %.c,$(INT_LSRCS))
-INT_CXXSRCS	= $(filter %.cpp,$(INT_LSRCS))
-INT_MSRCS	= $(filter %.m,$(INT_LSRCS))
+INT_CSRCS		= $(filter %.c,$(INT_LSRCS))
+INT_CXXSRCS		= $(filter %.cpp,$(INT_LSRCS))
+INT_MSRCS		= $(filter %.m,$(INT_LSRCS))
 
-INT_MGLWOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(SRCS:%.c=mglw~%.o)))
-INT_COBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CSRCS:%.c=%.o)))
-INT_CXXOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CXXSRCS:%.cpp=%.o)))
-INT_MOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_MSRCS:%.m=%.o)))
+INT_MGLWOBJ		= $(addprefix $(INT_BD)/, $(subst /,~,$(SRCS:%.c=mglw~%.o)))
+INT_COBJ		= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CSRCS:%.c=%.o)))
+INT_CXXOBJ		= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CXXSRCS:%.cpp=%.o)))
+INT_MOBJ		= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_MSRCS:%.m=%.o)))
 
-INT_ALLOBJ	= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ) $(INT_MGLWOBJ)
+INT_ALLOBJ		= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ) $(INT_MGLWOBJ)
 
-INT_CFLAG	= $(CFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
-INT_LCFLAG	= $(CFLAGS) $(LIB_CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
-INT_CXXFLAG	= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
+INT_CFLAG		= $(CFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
+INT_LCFLAG		= $(CFLAGS) $(LIB_CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
+INT_CXXFLAG		= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 
-INT_DEP		= $(INT_ALLOBJ:%.o=%.d)
-INT_INCSHA	= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
-INT_SHADERS	= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
+INT_DEP			= $(INT_ALLOBJ:%.o=%.d)
+INT_INCSHA		= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
+INT_SHADERS		= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
 
-BOBJ_GUARD	= $(shell if [ -d $(INT_BD) ]; then printf "on"; else printf "off"; fi)
+BOBJ_GUARD		= $(shell if [ -d $(INT_BD) ]; then printf "on"; else printf "off"; fi)
 
-.PHONY: all clean fclean re shaders static-libs $(INTERN_DEP)
+.PHONY: all clean fclean re shaders static-libs $(INT_DEP)
 
 all: $(INTERN_SHA) $(TARGETDIR)/$(NAME)
 
 shaders:
-	$(SILENT)$(MAKE) -Bs $(INTERN_SHA)
+	$(SILENT)$(MAKE) -Bs $(INT_SHADERS)
 
 static-libs:
 	@echo "$(INT_STATIC_LF)"
 
+include test/tests.mk
+
 $(INT_BD):
 	$(SILENT)mkdir -p $(INT_BD)
 
-$(INTERN_SHA): %.h: %
+$(INT_SHADERS): $(INCDIR_SHADERS)/%.h: $(SRCDIR_SHADERS)/%
 	@printf "\e[33mShader $<\e[31m\e[80D"
 	$(SILENT)printf "(const char[]){" > $@
 ifeq ($(OPSYS),Linux)

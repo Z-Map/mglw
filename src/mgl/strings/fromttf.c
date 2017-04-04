@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/03/14 16:56:24 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/04 18:07:46 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,10 @@
 #include <math.h>
 #include "mgl/strings.h"
 #define STB_TRUETYPE_IMPLEMENTATION
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
 #include "hlib/stb_truetype.h"
+#pragma GCC diagnostic pop
 
 #define MGL_FILEREAD_BUFSIZE 0x10000
 
