@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/04/01 05:25:41 by qloubier         ###   ########.fr        #
+#    Updated: 2017/04/02 18:27:47 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -92,6 +92,7 @@ ifeq ($(OPSYS),Linux)
 	glx_context.c\
 	egl_context.c
   SRCS_GLLOAD	+= glx_load.c glx_load_cpp.cpp
+  INT_STATIC_LF	= $(LINUXLIBS)
 else
   CDEFINES		+= -D_GLFW_COCOA -D_GLFW_USE_CHDIR -D_GLFW_USE_RETINA\
 	-D_GLFW_USE_MENUBAR
@@ -103,7 +104,8 @@ else
 	cocoa_monitor.m\
 	cocoa_window.m\
 	nsgl_context.m
-  CFLAGS		+= -Wno-deprecated-declarations
+  LIB_CFLAGS		+= -Wno-deprecated-declarations -Wno-pointer-sign
+  INT_STATIC_LF	= $(OSXLIBS)
 endif
 
 ifndef config
@@ -137,24 +139,27 @@ INT_COBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CSRCS:%.c=%.o)))
 INT_CXXOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_CXXSRCS:%.cpp=%.o)))
 INT_MOBJ	= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_MSRCS:%.m=%.o)))
 
-INT_ALLOBJ	= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ)
+INT_ALLOBJ	= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ) $(INT_MGLWOBJ)
 
 INT_CFLAG	= $(CFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
-INT_LCFLAG	= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
+INT_LCFLAG	= $(CFLAGS) $(LIB_CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 INT_CXXFLAG	= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 
-INT_DEP		= $(INTERN_OBJ:%.o=%.d)
+INT_DEP		= $(INT_ALLOBJ:%.o=%.d)
 INT_INCSHA	= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
 INT_SHADERS	= $(SHADERS:%=$(INCDIR_SHADERS)/%.h)
 
 BOBJ_GUARD	= $(shell if [ -d $(INT_BD) ]; then printf "on"; else printf "off"; fi)
 
-.PHONY: all clean fclean re shaders $(INTERN_DEP)
+.PHONY: all clean fclean re shaders static-libs $(INTERN_DEP)
 
 all: $(INTERN_SHA) $(TARGETDIR)/$(NAME)
 
 shaders:
 	$(SILENT)$(MAKE) -Bs $(INTERN_SHA)
+
+static-libs:
+	@echo "$(INT_STATIC_LF)"
 
 $(INT_BD):
 	$(SILENT)mkdir -p $(INT_BD)
@@ -194,7 +199,7 @@ endif
 $(INT_MOBJ):
 ifeq ($(BOBJ_GUARD),on)
 	@printf "\e[33mCompile $(notdir $@)\e[31m\e[80D"
-	$(SILENT)$(CC) -MMD -MP $(INT_CFLAG) -o $@ -c $(subst ~,/,$(@:$(INT_BD)/%.o=%.m))
+	$(SILENT)$(CC) -MMD -MP $(INT_LCFLAG) -o $@ -c $(subst ~,/,$(@:$(INT_BD)/%.o=%.m))
 	@printf "\e[80D%-79.79b \e[m[\e[32mok\e[m]\n" "\e[35m$(notdir $@)\e[m compiled !\e(B\e[m"
 endif
 
@@ -204,7 +209,7 @@ ifeq ($(BOBJ_GUARD),off)
 $(TARGETDIR)/$(NAME): $(INTERN_SHA) $(INT_BD)
 	$(SILENT)$(MAKE) -s $@ BOBJ_GUARD=on
 else
-$(TARGETDIR)/$(NAME): $(INT_ALLOBJ) $(INT_MGLWOBJ)
+$(TARGETDIR)/$(NAME): $(INT_ALLOBJ)
 	$(SILENT)$(AR) $(ARFLAGS) $@ $(INT_ALLOBJ) $(INT_MGLWOBJ)
 	@printf "\e[80D%-79.79b \e[m[\e[32mok\e[m]\n" "\e[35m$(NAME)\e[m compiled !\e(B\e[m"
 endif
