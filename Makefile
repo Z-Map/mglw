@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/04/04 18:13:12 by qloubier         ###   ########.fr        #
+#    Updated: 2017/04/04 18:33:11 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -154,7 +154,7 @@ BOBJ_GUARD		= $(shell if [ -d $(INT_BD) ]; then printf "on"; else printf "off"; 
 
 .PHONY: all clean fclean re shaders static-libs $(INT_DEP)
 
-all: $(INTERN_SHA) $(TARGETDIR)/$(NAME)
+all: $(INT_SHADERS) $(TARGETDIR)/$(NAME)
 
 shaders:
 	$(SILENT)$(MAKE) -Bs $(INT_SHADERS)
@@ -209,10 +209,10 @@ endif
 -include $(INT_DEP)
 
 ifeq ($(BOBJ_GUARD),off)
-$(TARGETDIR)/$(NAME): $(INTERN_SHA) $(INT_BD)
+$(TARGETDIR)/$(NAME): $(INT_SHADERS) $(INT_BD)
 	$(SILENT)$(MAKE) -s $@ BOBJ_GUARD=on
 else
-$(TARGETDIR)/$(NAME): $(INT_ALLOBJ)
+$(TARGETDIR)/$(NAME): $(INT_SHADERS) $(INT_ALLOBJ)
 	$(SILENT)$(AR) $(ARFLAGS) $@ $(INT_ALLOBJ) $(INT_MGLWOBJ)
 	@printf "\e[80D%-79.79b \e[m[\e[32mok\e[m]\n" "\e[35m$(NAME)\e[m compiled !\e(B\e[m"
 endif
