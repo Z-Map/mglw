@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/01/05 18:45:57 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/04/04 18:39:26 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ int		main()
 	//memcpy(img->pixels, pinguin->pixels, img->memlen);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
+	// NOPE !! //!\\ DANGER //!\\ 
 	catex = (unsigned char *)ca.glyphs;
 	puts("coucou2");
 	// for (y = 0; y < img->y; y++){
