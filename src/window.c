@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:38 by qloubier          #+#    #+#             */
-/*   Updated: 2017/03/14 19:46:55 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/08 22:58:11 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -170,13 +170,16 @@ void		mglw_rmwin(mglwin *win)
 int			mglwin_run(mglwin *win)
 {
 	const int	m = win->mode;
+	GLFWwindow	*ctxsave;
 
 	if ((win) && (win->data->state & 1))
 	{
+		ctxsave = glfwGetCurrentContext();
 		glfwMakeContextCurrent(win->data->window);
 		if (MGLWtcb[m].drawer)
 			MGLWtcb[m].drawer(win);
 		glfwSwapBuffers(win->data->window);
+		glfwMakeContextCurrent(ctxsave);
 		glfwPollEvents();
 		if (glfwWindowShouldClose(win->data->window))
 		{
@@ -189,9 +192,11 @@ int			mglwin_run(mglwin *win)
 			win->data->flags &= ~MGLW_STOP;
 			return (0);
 		}
+		ctxsave = glfwGetCurrentContext();
 		glfwMakeContextCurrent(win->data->window);
 		if (MGLWtcb[m].clearer)
 			MGLWtcb[m].clearer(win);
+		glfwMakeContextCurrent(ctxsave);
 		return (1);
 	}
 	return (0);
@@ -200,13 +205,16 @@ int			mglwin_run(mglwin *win)
 void		mglwin_draw(mglwin *win)
 {
 	const int	m = win->mode;
+	GLFWwindow	*ctxsave;
 
 	if ((win) && (win->data->state & 1))
 	{
+		ctxsave = glfwGetCurrentContext();
 		glfwMakeContextCurrent(win->data->window);
 		if (MGLWtcb[m].drawer)
 			MGLWtcb[m].drawer(win);
 		glfwSwapBuffers(win->data->window);
+		glfwMakeContextCurrent(ctxsave);
 	}
 }
 
@@ -243,12 +251,15 @@ int			mglwin_is_running(mglwin *win)
 void		mglwin_clear(mglwin *win)
 {
 	const int	m = win->mode;
+	GLFWwindow	*ctxsave;
 
 	if ((win) && (win->data->state & 1))
 	{
+		ctxsave = glfwGetCurrentContext();
 		glfwMakeContextCurrent(win->data->window);
 		if (MGLWtcb[m].clearer)
 			MGLWtcb[m].clearer(win);
+		glfwMakeContextCurrent(ctxsave);
 	}
 }
 
@@ -313,11 +324,15 @@ mglwin		*mglw_togglefullscreen(mglwin *win, int fullres)
 mglwin			*mglw_draw_itow(mglwin *win, mglimg *img, int x, int y)
 {
 	const int	m = win->mode;
+	GLFWwindow	*ctxsave;
 
 	if ((win) && (win->data->state & 1))
 	{
+		ctxsave = glfwGetCurrentContext();
+		glfwMakeContextCurrent(win->data->window);
 		if (MGLWtcb[m].imagedraw)
 			MGLWtcb[m].imagedraw(win, img, x, y);
+		glfwMakeContextCurrent(ctxsave);
 	}
 	return (win);
 }

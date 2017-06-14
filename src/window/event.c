@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 21:59:43 by map               #+#    #+#             */
-/*   Updated: 2017/02/26 16:23:47 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/07 20:21:59 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,10 @@ void		MGLWsizeprocess(GLFWwindow *win, int w, int h)
 {
 	mglw_wd *const	wdata = (mglw_wd *)glfwGetWindowUserPointer(win);
 	void			(*sizecb)(void *, int, int) = wdata->sizecb;
+	GLFWwindow		*ctxsave;
 
+	ctxsave = glfwGetCurrentContext();
+	glfwMakeContextCurrent(win);
 	wdata->screen_w = w;
 	wdata->screen_h = h;
 	if (!(wdata->flags & (MGLW_FULLRES | MGLW_FULLSCREEN)))
@@ -72,6 +75,7 @@ void		MGLWsizeprocess(GLFWwindow *win, int w, int h)
 		mglw_resizeimg((mglimg *)(wdata->layer2D), w, h, MGLW_TF_UNDEFINED);
 	if (sizecb)
 		sizecb(wdata->sizecb_arg, w, h);
+	glfwMakeContextCurrent(ctxsave);
 }
 
 void		MGLWpositionprocess(GLFWwindow *win, int x, int y)
