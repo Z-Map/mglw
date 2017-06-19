@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/04/04 18:07:46 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/19 17:01:49 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,13 +118,9 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 
 	if (!chartab)
 		len = 128;
-	ca.glyphs = NULL;
-	ca.metrics = NULL;
-	ca.texoffset = NULL;
-	ca.length = 0;
-	ca.texture = 0;
-	ca.box = (v2i){0,0};
-	ca.linesize = 0.0f;
+	ca = (mglca){ .glyphs = NULL, .metrics = NULL, .texoffset = NULL,
+		.length = 0, .texture = 0, .vbo = 0, .box = (v2i){0,0},
+		.linesize = 0.0f};
 	if (!len)
 		return (ca);
 	ca.glyphs = (unsigned int *)chartab;
@@ -225,4 +221,15 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ca.length = len;
 	return (clean_end_ttftoca(ca, fbuf, tex));
+}
+
+mglca			*mgl_charatlas_loadbuffer(mglca *ca)
+{
+	t_v3f		*vt;
+	t_v2f		*uvt;
+
+	if (!(ca->vbo))
+		glGenBuffers(1, &(ca->vbo));
+	vt = malloc(ca->length * (sizeof(t_v3f) + sizeof(t_v2f)));
+
 }

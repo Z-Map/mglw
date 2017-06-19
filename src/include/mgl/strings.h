@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/29 05:02:29 by qloubier          #+#    #+#             */
-/*   Updated: 2017/01/01 08:34:35 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/19 17:01:48 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include "mgl/data/charatlas.h"
 
 mglca		mgl_ttf_to_charatlas(const char *ttfpath, int *chartab, size_t len);
+mglca		*mgl_charatlas_loadbuffer(mglca *ca);
 
 mglstr		*mgl_cstrtomglstr(mglca *charatlas, const char *str);
 

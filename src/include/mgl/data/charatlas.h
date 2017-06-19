@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/29 06:21:04 by qloubier          #+#    #+#             */
-/*   Updated: 2017/01/05 16:41:57 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/19 11:54:22 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ typedef struct		mgl_char_atlas
 	v2i				box;
 	float			linesize;
 	GLuint			texture;
+	GLuint			vbo;
+	int				padding;
 }					mglca;
 
 #endif
