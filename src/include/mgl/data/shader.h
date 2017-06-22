@@ -6,14 +6,14 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/19 20:19:31 by qloubier          #+#    #+#             */
-/*   Updated: 2017/04/01 05:04:19 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/22 19:19:28 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MGL_SHADER_H
-#define MGL_SHADER_H
+# define MGL_SHADER_H
 
-#include "glload/gl_2_1.h"
+# include "glload/gl_all.h"
 
 typedef struct				mgl_shader
 {

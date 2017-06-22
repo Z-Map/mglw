@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/19 17:01:49 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/22 19:06:49 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -225,11 +225,34 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 
 mglca			*mgl_charatlas_loadbuffer(mglca *ca)
 {
-	t_v3f		*vt;
-	t_v2f		*uvt;
+	v3f			*vt;
+	v2f			*uvt;
+	size_t		i, j;
 
-	if (!(ca->vbo))
+	if (ca && (ca->length) && !(ca->vbo))
 		glGenBuffers(1, &(ca->vbo));
-	vt = malloc(ca->length * (sizeof(t_v3f) + sizeof(t_v2f)));
-
+	if (!ca || !(ca->length) || !(ca->vbo) ||
+		!(vt = malloc(ca->length * (4 * (sizeof(v3f) + sizeof(v2f))))))
+		return (NULL);
+	uvt = (v2f *)(&vt[ca->length * 4]);
+	for (i = ca->length; i--; )
+	{
+		j = i * 4;
+		vt[j] = (v3f){0.0f, ca->metrics[i].y, 0.0};
+		vt[j + 1] = (v3f){0.0f, ca->metrics[i].y + ca->metrics[i].w, 0.0};
+		vt[j + 2] = (v3f){ca->metrics[i].z,
+			ca->metrics[i].y, 0.0};
+		vt[j + 3] = (v3f){ca->metrics[i].z,
+			ca->metrics[i].y + ca->metrics[i].w, 0.0};
+		j += ca->length * 4;
+		uvt[j] = (v2f){ca->texoffset[i].x, ca->texoffset[i].y};
+		uvt[j + 1] = (v2f){ca->texoffset[i].z, ca->texoffset[i].w};
+		uvt[j + 2] = (v2f){ca->texoffset[i].x, ca->texoffset[i].y};
+		uvt[j + 3] = (v2f){ca->texoffset[i].z, ca->texoffset[i].w};
+	}
+	i = ca->length * (4 * (sizeof(v3f) + sizeof(v2f)));
+	glBindBuffer(GL_ARRAY_BUFFER, ca->vbo);
+	glBufferData(GL_ARRAY_BUFFER, i, vt, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	return (ca);
 }
