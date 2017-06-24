@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/23 01:40:38 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/24 21:10:55 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,7 @@ int		main()
 	mglwin					*win;
 	mglimg					*img;
 	mglca					ca;
+	mglstr					*str;
 	// mglimg					*pinguin;
 	unsigned int			*tex;
 	// unsigned int			x,y,i;
@@ -42,6 +43,7 @@ int		main()
 	//memcpy(img->pixels, pinguin->pixels, img->memlen);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
+	str = mgl_cstrtomglstr(&ca, "coucou !", 0.2f);
 	puts("coucou2");
 	// for (y = 0; y < img->y; y++){
 	// for (x = 0; x < img->x; x++)
@@ -54,7 +56,7 @@ int		main()
 	puts("coucou3");
 	while (mglwin_run(win))
 	{
-
+		mgl_drawmglstr(win, str, (v2f){1,1}, 16);
 		nanosleep(&t, NULL);
 	}
 	mglw_close();

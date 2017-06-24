@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/22 19:06:49 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/24 18:13:29 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -244,7 +244,6 @@ mglca			*mgl_charatlas_loadbuffer(mglca *ca)
 			ca->metrics[i].y, 0.0};
 		vt[j + 3] = (v3f){ca->metrics[i].z,
 			ca->metrics[i].y + ca->metrics[i].w, 0.0};
-		j += ca->length * 4;
 		uvt[j] = (v2f){ca->texoffset[i].x, ca->texoffset[i].y};
 		uvt[j + 1] = (v2f){ca->texoffset[i].z, ca->texoffset[i].w};
 		uvt[j + 2] = (v2f){ca->texoffset[i].x, ca->texoffset[i].y};

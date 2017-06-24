@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/06/23 15:13:43 by qloubier         ###   ########.fr        #
+#    Updated: 2017/06/24 15:20:11 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -65,8 +65,10 @@ SRCS			=\
 	error.c\
 	mgl/shaders.c\
 	mgl/strings/fromttf.c\
+	mgl/strings/string.c\
 
 SHADERS			= pixelbox.vert pixelbox.frag\
+	char.vert char.frag\
 
 SRCS_GLLOAD		= gl_load.c gl_load_cpp.cpp
 
