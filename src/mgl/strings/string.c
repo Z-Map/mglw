@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/24 21:33:13 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 14:47:18 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,6 +56,7 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
 	v3f			*vt = NULL;
 	v2f			*uvt = NULL;
 	float		pos = 0.0f;
+	v4f			vec;
 
 	len = strlen(str);
 	printf("gui : %zi !\n", len);
@@ -72,27 +73,30 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
 	if (!(ms->vbo_data)
 		|| !(vt = malloc((sizeof(v3f) + sizeof(v2f)) * 6 * len)))
 		return (clean_exit(ms, vt, 1));
-	uvt = (v2f *)(vt + 6 * len);
+	uvt = (v2f *)(&vt[6 * len]);
 	printf("gui %zi %zi!\n", i, len);
 	while (i < len)
 	{
 		j = find_charid(ca, str[i]);
 		h = (int)i * 6;
-		vt[h] = (v3f){pos, ca->metrics[j].y, 0.0};
-		vt[h + 1] = (v3f){pos, ca->metrics[j].y + ca->metrics[i].w, 0.0};
-		vt[h + 2] = (v3f){pos + ca->metrics[j].z, ca->metrics[j].y, 0.0};
-		vt[h + 3] = (v3f){pos, ca->metrics[j].y + ca->metrics[i].w, 0.0};
-		vt[h + 4] = (v3f){pos + ca->metrics[j].z, ca->metrics[j].y, 0.0};
-		vt[h + 5] = (v3f){pos + ca->metrics[j].z, ca->metrics[j].y + ca->metrics[j].w, 0.0};
+		printf("char : '%c'\n", str[i]);
+		printf("metrics : %.3f,%.3f - %.3f,%.3f\n", ca->metrics[j].x,
+			ca->metrics[j].y, ca->metrics[j].z, ca->metrics[j].w);
+		vec = (v4f){pos, ca->metrics[j].y, pos + ca->metrics[j].z, ca->metrics[j].y + ca->metrics[j].w};
+		vt[h] = (v3f){vec.x, vec.y, 0.0};
+		vt[h + 3] = vt[h + 1] = (v3f){vec.x, vec.w, 0.0};
+		vt[h + 4] = vt[h + 2] = (v3f){vec.z, vec.y, 0.0};
+		vt[h + 5] = (v3f){vec.z, vec.w, 0.0};
+		printf("vec (%.2f,%.2f,%.2f,%.2f)\n", vec.x, vec.y, vec.z, vec.w);
 		// h += len * 6;
 		uvt[h] = (v2f){ca->texoffset[j].x, ca->texoffset[j].y};
-		uvt[h + 1] = (v2f){ca->texoffset[j].z, ca->texoffset[j].w};
-		uvt[h + 2] = (v2f){ca->texoffset[j].x, ca->texoffset[j].y};
-		uvt[h + 3] = (v2f){ca->texoffset[j].z, ca->texoffset[j].w};
-		uvt[h + 4] = (v2f){ca->texoffset[j].x, ca->texoffset[j].y};
+		uvt[h + 3] = uvt[h + 1] = (v2f){ca->texoffset[j].z, ca->texoffset[j].w};
+		uvt[h + 4] = uvt[h + 2] = (v2f){ca->texoffset[j].x, ca->texoffset[j].y};
 		uvt[h + 5] = (v2f){ca->texoffset[j].z, ca->texoffset[j].w};
 		pos += lsp + ca->metrics[j].z;
-		printf("%f %f %f %f\n", vt[h].x, vt[h].y, vt[h + 1].x, vt[h + 1].y);
+		printf("(%.2f,%.2f) (%.2f,%.2f) (%.2f,%.2f) (%.2f,%.2f)\n",
+			vt[h].x, vt[h].y, vt[h + 1].x, vt[h + 1].y,
+			vt[h + 2].x, vt[h + 2].y, vt[h + 5].x, vt[h + 5].y);
 		i++;
 	}
 	// glBindVertexArray(ms->vao);
@@ -124,6 +128,7 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, v2f pos, float size)
 		glBindAttribLocation(shr.id, 1, "v_uv");
 		// glUniform1i(glGetUniformLocation(shr.id, "image" ), 0);
 	}
+	printf("gu !!\n");
 	glUseProgram(shr.id);
 	loc = glGetUniformLocation(shr.id, "screen");
 	glUniform2f(loc, (float)(win->data->screen_w), (float)(win->data->screen_h));
@@ -138,11 +143,11 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, v2f pos, float size)
 	glEnable(GL_ALPHA_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBindBuffer(GL_ARRAY_BUFFER, str->vbo_data);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
+	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0,
 		(void *)(str->length * 6 * sizeof(v3f)));
-	glEnableVertexAttribArray(1);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, str->ca->texture);
 	glDrawArrays(GL_TRIANGLES, 0, str->length * 6);

@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/24 18:13:29 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 14:19:43 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,7 +117,7 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	int				x0, y0, x1, y1, gx0, gy0, gx1, gy1, gw, gh, bw, bh;
 
 	if (!chartab)
-		len = 128;
+		len = 95;
 	ca = (mglca){ .glyphs = NULL, .metrics = NULL, .texoffset = NULL,
 		.length = 0, .texture = 0, .vbo = 0, .box = (v2i){0,0},
 		.linesize = 0.0f};
@@ -146,7 +146,7 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	else
 		texsize = (size_t)ceilf(sqrtf(
 			ceilf(len * ((float)bh / (float)bw)))) * bw;
-	printf("tex size %zi\nbw %i\nbh %i\n", texsize, bw, bh);
+	printf("tex size %zi bw %i bh %i x(%i, %i) y(%i, %i)\n", texsize, bw, bh, x0, x1, y0, y1);
 	if (texsize > 8192)
 		return (clean_end_ttftoca(ca, fbuf, tex));
 	tw = 256;
@@ -166,10 +166,11 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	y = 0;
 	for (i = 0; i < len; i++)
 	{
-		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 31));
+		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 32));
 		stbtt_GetGlyphBitmapBox(&font, g, fs, fs, &gx0, &gy0, &gx1, &gy1);
 		gw = gx1-gx0;
 		gh = gy1-gy0;
+		printf("c : %c gw %i gh %i gx(%i, %i) gy(%i, %i)\n", (char)((int)i + 32),gw, gh, gx0, gx1, gy0, gy1);
 		ca.texoffset[i] = (v4f){
 			(float)x / (float)tw,
 			(float)y / (float)tw,
@@ -177,8 +178,8 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 			(float)(y + gh) / (float)tw
 		};
 		ca.metrics[i] = (v4f){
-			(float)(gx0 - x0) / (float)bw,
-			(float)(gy0 - y0) / (float)bh,
+			(float)(gx0 - (x0 * fs)) / (float)bw,
+			(float)(gy0 - (y0 * fs)) / (float)bh,
 			(float)gw / (float)bw,
 			(float)gh / (float)bh
 		};

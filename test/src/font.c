@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/24 21:10:55 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 14:45:23 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@
 
 int		main()
 {
-	const struct timespec	t = (struct timespec){0, 12000000L};
+	const struct timespec	t = (struct timespec){0, 120000000L};
 	mglwin					*win;
 	mglimg					*img;
 	mglca					ca;
@@ -56,7 +56,7 @@ int		main()
 	puts("coucou3");
 	while (mglwin_run(win))
 	{
-		mgl_drawmglstr(win, str, (v2f){1,1}, 16);
+		mgl_drawmglstr(win, str, (v2f){1,1}, 50);
 		nanosleep(&t, NULL);
 	}
 	mglw_close();
