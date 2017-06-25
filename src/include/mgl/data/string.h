@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:30:26 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/24 21:23:28 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 16:02:20 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ typedef struct		mgl_string
 	size_t			length;
 	char			*str;
 	mglca			*ca;
-	GLuint			vbo_data;
+	GLuint			vbo;
 	GLuint			vao;
 }					mglstr;
 

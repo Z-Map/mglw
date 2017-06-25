@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/25 14:19:43 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 21:24:51 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -196,14 +196,15 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 		x += bw + 1;
 	}
 	// Gen GL texture
-	glGenTextures(1, &texid);
-	ca.texture = texid;
+	glGenTextures(1, &ca.texture);
+	texid = ca.texture;
 	glBindTexture(GL_TEXTURE_2D, texid);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_R,
-		tw, tw, 0, GL_R, GL_UNSIGNED_BYTE, tex);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
+		tw, tw, 0, GL_RED, GL_UNSIGNED_BYTE, tex);
 	i = 96;
 	x = 1;
 	// Get max char bounding box
@@ -215,8 +216,8 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 		bh = (int)round((y1 - y0) * fs) + 1;
 		tw /= 2;
 		fill_tex(&font, tex, chartab, len, bw + 1, bh + 1, fs, tw);
-		glTexImage2D(GL_TEXTURE_2D, x++, GL_R,
-			tw, tw, 0, GL_R, GL_UNSIGNED_BYTE, tex);
+		glTexImage2D(GL_TEXTURE_2D, x++, GL_RED,
+			tw, tw, 0, GL_RED, GL_UNSIGNED_BYTE, tex);
 	}
 	(void)fill_tex;
 	glBindTexture(GL_TEXTURE_2D, 0);

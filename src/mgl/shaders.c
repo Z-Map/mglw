@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/22 02:25:04 by qloubier          #+#    #+#             */
-/*   Updated: 2016/12/22 03:20:52 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 16:00:57 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,12 +55,13 @@ mglsha		*mgl_compile_shader(mglsha *shdr)
 	glLinkProgram(shdr->id);
 	glGetProgramiv(shdr->id, GL_LINK_STATUS, &result);
 	glGetProgramiv(shdr->id, GL_INFO_LOG_LENGTH, &error_len);
+	printf("link : %i - %i\n", result, error_len);
 	if(error_len)
 	{
 		err_msg = malloc(error_len + 1);
 		err_msg[error_len] = '\0';
-		glGetShaderInfoLog(shdr->vshid, error_len, NULL, err_msg);
-		printf("Program link : %s\n", err_msg);
+		glGetProgramInfoLog(shdr->id, error_len, NULL, err_msg);
+		printf("Program link : %.*s\n", error_len, err_msg);
 		free(err_msg);
 	}
 	return (shdr);

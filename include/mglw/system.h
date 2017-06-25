@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 04:05:26 by qloubier          #+#    #+#             */
-/*   Updated: 2017/02/03 17:31:58 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/25 21:32:48 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #define MGLW_SYSTEM_H
 
 #include "mglw/mglw_header.h"
+#define mglw_AUVOIR mglw_close
 
 /* MiniGLwin System management */
 
