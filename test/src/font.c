@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/25 21:36:17 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 12:11:19 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int		main()
 	mglw_setGLContext(win);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
-	str = mgl_cstrtomglstr(&ca, "Color : #FF00FF", 0.15f);
+	str = mgl_cstrtomglstr(&ca, "Color : #FF00FF", 0.1f);
 	// mglstr_auvoir(&str);
 	puts("coucou2");
 	glGenTextures(1, &(ping->texid));
@@ -103,7 +103,7 @@ int		main()
 		// glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
 		// glUseProgram(0);
 		// mglw_draw_itow(win, (mglimg *)ping, 0, 0);
-		mgl_drawmglstr(win, str, (v2f){1,1}, 46);
+		mgl_drawmglstr(win, str, (float[2]){0,0}, 16,(float[4]){1.0f,0.0,0.0f,1.0f});
 		nanosleep(&t, NULL);
 	}
 	mglw_close();

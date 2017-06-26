@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/25 21:24:51 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 12:49:17 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,12 +133,15 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	fs = stbtt_ScaleForPixelHeight(&font, 94);
 	// Get Vertical font metrics
 	stbtt_GetFontVMetrics(&font, &x0, &x1, &y0);
-	ca.linesize = (x0 + x1 + y0) * fs;
+	ca.ascent = x0;
+	ca.descent = x1;
+	ca.linesize = (x0 - x1) + y0;
+	printf("asc %i desc %i lg %i\n", x0, x1, y0);
 	// Get max char bounding box
 	stbtt_GetFontBoundingBox(&font, &x0, &y0, &x1, &y1);
 	bw = (int)round((x1 - x0) * fs) + 1;
 	bh = (int)round((y1 - y0) * fs) + 1;
-	ca.box = (v2i){bw - 1, bh - 1};
+	ca.box = (v2i){x1 - x0, y1 - y0};
 	// Calculate texture size
 	if (bw < bh)
 		texsize = (size_t)ceilf(sqrtf(
@@ -164,13 +167,14 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	bh -= 1;
 	x = 0;
 	y = 0;
+	printf("%.3f %.3f %.3f %.3f\n", (float)(x0 * fs), (float)(x1 * fs),
+		(float)(y0 * fs), (float)(y1 * fs));
 	for (i = 0; i < len; i++)
 	{
 		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 32));
 		stbtt_GetGlyphBitmapBox(&font, g, fs, fs, &gx0, &gy0, &gx1, &gy1);
 		gw = gx1-gx0;
 		gh = gy1-gy0;
-		printf("c : %c gw %i gh %i gx(%i, %i) gy(%i, %i)\n", (char)((int)i + 32),gw, gh, gx0, gx1, gy0, gy1);
 		ca.texoffset[i] = (v4f){
 			(float)x / (float)tw,
 			(float)y / (float)tw,
@@ -178,11 +182,14 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 			(float)(y + gh) / (float)tw
 		};
 		ca.metrics[i] = (v4f){
-			(float)(gx0 - (x0 * fs)) / (float)bw,
-			(float)(gy0 - (y0 * fs)) / (float)bh,
+			((float)gx0 - (float)(x0 * fs)) / (float)bw,
+			((float)gy0 - (float)(y0 * fs)) / (float)bh,
 			(float)gw / (float)bw,
 			(float)gh / (float)bh
 		};
+		printf("c : %c gw %i gh %i gx(%i, %i) gy(%i, %i) - metric : %.2f, %.2f, %.2f, %.2f\n",
+			(char)((int)i + 32),gw, gh, gx0, gx1, gy0, gy1,
+			ca.metrics[i].x, ca.metrics[i].y, ca.metrics[i].z, ca.metrics[i].w);
 		if ((gw > bw) || (gh > bh))
 			return (clean_end_ttftoca(ca, fbuf, tex));
 		if ((x + bw) > tw)

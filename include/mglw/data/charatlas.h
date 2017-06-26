@@ -6,28 +6,29 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/29 06:21:04 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 10:13:22 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 11:29:37 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MGL_CHARATLAS_H
 # define MGL_CHARATLAS_H
 
-# include "glload/gl_all.h"
+# include <string.h>
+
 # include "mgl/data/vector.h"
 
 typedef struct		mgl_char_atlas
 {
 	unsigned int	*glyphs;
-	v4f				*texoffset;
-	v4f				*metrics;
+	float			*texoffset;
+	float			*metrics;
 	size_t			length;
-	v2i				box;
+	int				box[2];
 	float			ascent;
 	float			descent;
 	float			linesize;
-	GLuint			texture;
-	GLuint			vbo;
+	unsigned int	texture;
+	unsigned int	vbo;
 	int				padding;
 }					mglca;
 

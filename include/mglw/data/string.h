@@ -1,34 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   charatlas.h                                        :+:      :+:    :+:   */
+/*   string.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/12/29 06:21:04 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 10:13:22 by qloubier         ###   ########.fr       */
+/*   Created: 2017/01/01 08:30:26 by qloubier          #+#    #+#             */
+/*   Updated: 2017/06/26 11:29:14 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef MGL_CHARATLAS_H
-# define MGL_CHARATLAS_H
+#ifndef MGL_STRING_H
+#define MGL_STRING_H
 
-# include "glload/gl_all.h"
-# include "mgl/data/vector.h"
+# include <string.h>
 
-typedef struct		mgl_char_atlas
+#include "mglw/data/charatlas.h"
+
+typedef struct		mgl_string
 {
-	unsigned int	*glyphs;
-	v4f				*texoffset;
-	v4f				*metrics;
 	size_t			length;
-	v2i				box;
-	float			ascent;
-	float			descent;
-	float			linesize;
-	GLuint			texture;
-	GLuint			vbo;
-	int				padding;
-}					mglca;
+	char			*str;
+	mglca			*ca;
+	unsigned int	vbo;
+	unsigned int	vao;
+}					mglstr;
 
 #endif

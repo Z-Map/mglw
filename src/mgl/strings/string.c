@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/25 21:25:34 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 12:10:39 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,8 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
 	return (clean_exit(ms, vt, 0));
 }
 
-void		mgl_drawmglstr(mglwin *win, mglstr *str, v2f pos, float size)
+void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
+				float color[4])
 {
 	static mglsha	shr = (mglsha){ 0, 0, 0, 0, NULL, NULL};
 	GLint			loc;
@@ -136,15 +137,17 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, v2f pos, float size)
 		glUniform1i(loc, 0);
 	}
 	glUseProgram(shr.id);
-	loc = glGetUniformLocation(shr.id, "screen");
-	glUniform2f(loc, (float)(win->data->screen_w), (float)(win->data->screen_h));
-	loc = glGetUniformLocation(shr.id, "size");
-	glUniform1f(loc, (float)size);
+	pos[0] = ((pos[0] / (float)(win->data->screen_w)) * 2.0f) - 1.0f;
+	pos[1] = 1.0f - ((pos[1] / (float)(win->data->screen_h)) * 2.0f);
 	loc = glGetUniformLocation(shr.id, "position");
-	glUniform2f(loc, pos.x, pos.y);
+	glUniform2fv(loc, 1, pos);
+	loc = glGetUniformLocation(shr.id, "size");
+	pos[1] = ((size / (float)(win->data->screen_h)) * 2.0f);
+	size = size * ((float)str->ca->box.y / (float)str->ca->box.x);
+	pos[0] = ((size / (float)(win->data->screen_w)) * 2.0f);
+	glUniform2fv(loc, 1, pos);
 	loc = glGetUniformLocation(shr.id, "color");
-	glUniform4f(loc, 1.0f, 1.0f, 1.0f, 1.0f);
-	// glUseProgram(0);
+	glUniform4fv(loc, 1, color);
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
