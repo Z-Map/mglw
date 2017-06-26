@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/15 15:32:54 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/24 15:18:40 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 17:54:09 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,6 +35,17 @@ static const mglsha		mglstr2d_shader = (mglsha){
 ,
 	.fsh =
 #include "char.frag.h"
+};
+
+static const mglsha		mglrect2d_shader = (mglsha){
+	.id = 0,
+	.vshid = 0,
+	.fshid = 0,
+	.vsh =
+#include "rect.vert.h"
+,
+	.fsh =
+#include "rect.frag.h"
 };
 
 #endif

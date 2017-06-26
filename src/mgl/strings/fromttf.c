@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 12:49:17 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 17:49:28 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ static mglca	clean_end_ttftoca(mglca ca, void *fbuf, void *tex)
 }
 
 static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
-					size_t len, int bw, int bh, float fs, unsigned int tw)
+					size_t len, float fs, unsigned int tw, v4f *texoffset)
 {
 	size_t			i, x, y;
 	int				g, x0,y0,x1,y1, gw, gh;
@@ -84,17 +84,13 @@ static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
 	y = 0;
 	for (i = 0; i < len; i++)
 	{
-		g = stbtt_FindGlyphIndex(font, (chartab) ? chartab[i] : (int)i);
+		g = stbtt_FindGlyphIndex(font, (chartab) ? chartab[i] : (int)i + 32);
 		stbtt_GetGlyphBitmapBox(font, g, fs, fs, &x0,&y0,&x1,&y1);
-		gw = x1-x0;
-		gh = y1-y0;
-		if ((x + bw) > tw)
-		{
-			x = 0;
-			y += bh;
-		}
+		gw = x1 - x0;
+		gh = y1 - y0;
+		x = round(texoffset[i].x * tw);
+		y = round(texoffset[i].y * tw);
 		stbtt_MakeGlyphBitmap(font, tex + x + (y * tw), gw, gh, tw, fs, fs, g);
-		x += bw;
 	}
 }
 
@@ -173,8 +169,8 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	{
 		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 32));
 		stbtt_GetGlyphBitmapBox(&font, g, fs, fs, &gx0, &gy0, &gx1, &gy1);
-		gw = gx1-gx0;
-		gh = gy1-gy0;
+		gw = gx1 - gx0;
+		gh = gy1 - gy0;
 		ca.texoffset[i] = (v4f){
 			(float)x / (float)tw,
 			(float)y / (float)tw,
@@ -183,7 +179,7 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 		};
 		ca.metrics[i] = (v4f){
 			((float)gx0 - (float)(x0 * fs)) / (float)bw,
-			((float)gy0 - (float)(y0 * fs)) / (float)bh,
+			((float)gy0 - (float)(y0 * -fs)) / (float)bh,
 			(float)gw / (float)bw,
 			(float)gh / (float)bh
 		};
@@ -219,10 +215,10 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	while (i > 6) {
 		i /= 2;
 		fs = stbtt_ScaleForPixelHeight(&font, (int)i - 2);
-		bw = (int)round((x1 - x0) * fs) + 1;
-		bh = (int)round((y1 - y0) * fs) + 1;
+		bw = (int)round((x1 - x0) * fs);
+		bh = (int)round((y1 - y0) * fs);
 		tw /= 2;
-		fill_tex(&font, tex, chartab, len, bw + 1, bh + 1, fs, tw);
+		fill_tex(&font, tex, chartab, len, fs, tw, ca.texoffset);
 		glTexImage2D(GL_TEXTURE_2D, x++, GL_RED,
 			tw, tw, 0, GL_RED, GL_UNSIGNED_BYTE, tex);
 	}

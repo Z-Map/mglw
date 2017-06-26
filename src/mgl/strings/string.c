@@ -6,12 +6,13 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 12:10:39 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 16:12:13 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "glload/gl_all.h"
 #include "mgl/shaders.h"
 #include "mgl/ressources/shaders/basic.h"
@@ -123,6 +124,7 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 {
 	static mglsha	shr = (mglsha){ 0, 0, 0, 0, NULL, NULL};
 	GLint			loc;
+	int				sf, i = 94, tlvl = 0;
 
 	if (!win || !str)
 		return ;
@@ -136,6 +138,7 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 		loc = glGetUniformLocation(shr.id, "chartex" );
 		glUniform1i(loc, 0);
 	}
+	sf = round(size);
 	glUseProgram(shr.id);
 	pos[0] = ((pos[0] / (float)(win->data->screen_w)) * 2.0f) - 1.0f;
 	pos[1] = 1.0f - ((pos[1] / (float)(win->data->screen_h)) * 2.0f);
@@ -148,6 +151,10 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	glUniform2fv(loc, 1, pos);
 	loc = glGetUniformLocation(shr.id, "color");
 	glUniform4fv(loc, 1, color);
+	// loc = glGetUniformLocation(shr.id, "texlvl");
+	while (((i /= 2) > sf) && (tlvl < 4))
+		tlvl++;
+	// glUniform1i(loc, tlvl);
 	glPushAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
@@ -161,7 +168,9 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	glEnableVertexAttribArray(1);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, str->ca->texture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, tlvl);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, tlvl);
 	glDrawArrays(GL_TRIANGLES, 0, str->length * 6);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisableVertexAttribArray(0);
