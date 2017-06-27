@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 16:12:13 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/27 00:39:58 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,7 +49,7 @@ static size_t	find_charid(mglca *ca, char c)
 	return (0);
 }
 
-mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
+mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp, float space)
 {
 	size_t		len = 0, i = 0, j = 0;
 	int			h = 0;
@@ -79,8 +79,14 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
 	printf("gui %zi %zi!\n", i, len);
 	while (i < len)
 	{
+		if ((str[i] == ' ') || (str[i] == '\t'))
+		{
+			pos += (str[i] == '\t') ? (space * 4.0f) : space;
+			i++;
+			ms->length -= 1;
+			continue;
+		}
 		j = find_charid(ca, str[i]);
-		h = (int)i * 6;
 		printf("char : '%c'\n", str[i]);
 		printf("metrics : %.3f,%.3f - %.3f,%.3f\n", ca->metrics[j].x,
 			ca->metrics[j].y, ca->metrics[j].z, ca->metrics[j].w);
@@ -104,10 +110,13 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp)
 			vt[h].x, vt[h].y, vt[h + 1].x, vt[h + 1].y,
 			vt[h + 2].x, vt[h + 2].y, vt[h + 5].x, vt[h + 5].y);
 		i++;
+		h += 6;
 	}
 	// glBindVertexArray(ms->vao);
+	if (ms->length < len)
+		memmove(&(vt[h]), uvt, (sizeof(v2f) * h));
 	glBindBuffer(GL_ARRAY_BUFFER, ms->vbo);
-	glBufferData(GL_ARRAY_BUFFER, (sizeof(v3f) + sizeof(v2f)) * 6 * len,
+	glBufferData(GL_ARRAY_BUFFER, (sizeof(v3f) + sizeof(v2f)) * 6 * ms->length,
 		vt, GL_STATIC_DRAW);
 	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 	// glEnableVertexAttribArray(0);

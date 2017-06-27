@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/29 06:21:04 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 11:29:37 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/27 14:09:36 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,6 @@
 # define MGL_CHARATLAS_H
 
 # include <string.h>
-
-# include "mgl/data/vector.h"
 
 typedef struct		mgl_char_atlas
 {

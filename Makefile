@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/06/24 15:20:11 by qloubier         ###   ########.fr        #
+#    Updated: 2017/06/26 20:45:16 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -69,6 +69,7 @@ SRCS			=\
 
 SHADERS			= pixelbox.vert pixelbox.frag\
 	char.vert char.frag\
+	rect.vert rect.frag\
 
 SRCS_GLLOAD		= gl_load.c gl_load_cpp.cpp
 

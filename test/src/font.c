@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 17:46:27 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/27 00:34:41 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@ int		main()
 	mglw_setGLContext(win);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
-	str = mgl_cstrtomglstr(&ca, "On est des malades !!", 0.1f);
+	str = mgl_cstrtomglstr(&ca, "On est des malades !!", 0.1f, 0.3f);
 	// mglstr_auvoir(&str);
 	puts("coucou2");
 	// ca.texture = ping->texid;
