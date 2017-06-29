@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/26 11:21:36 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 12:21:24 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:32:53 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ mglca		mgl_ttf_to_charatlas(const char *ttfpath, int *chartab, size_t len);
 
 mglstr		*mgl_cstrtomglstr(mglca *charatlas, const char *str, float lsp,
 				float space);
-float		mgl_strpxlen(mglwin *win, mglstr *str, float size);
+float		mgl_strpxlen(mglstr *str, float size);
+float		mgl_strsize(mglstr *str, float px);
 void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 				unsigned int color);
 void		mgl_delstr(mglstr **str);

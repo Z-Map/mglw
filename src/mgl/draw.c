@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/26 17:30:03 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 12:13:51 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:30:59 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,6 @@ static int			rect_init(GLuint *vbo, mglsha *shr)
 	glBindBuffer(GL_ARRAY_BUFFER, *vbo);
 	glBufferData(GL_ARRAY_BUFFER, 12 * sizeof(float), vertx, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	printf("Rect compile : %u, %u\n", *vbo, shr->id);
 	return (1);
 }
 

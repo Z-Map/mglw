@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 12:17:58 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:38:52 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,14 +57,14 @@ int		main()
 	// 		(catex[i] << 16) | (catex[i] << 8);
 	// }
 	// }
-	rect = (mglrect){0, {280.0f, 300.0f}, {320.0f, 25.0f},
-		2.0f, 2.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
+	rect = (mglrect){0, {295.0f, 300.0f}, {310.f, mgl_strsize(str, 300.0f)},
+		5.0f, 5.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
 	puts("coucou3");
 	while (mglwin_run(win))
 	{
 		mglw_setGLContext(win);
 		mgl_drawrect(win, rect);
-		mgl_drawmglstr(win, str, (float[2]){300,300}, 25, 0xFFFFFFFF);
+		mgl_drawmglstr(win, str, (float[2]){300,300}, mgl_strsize(str, 300.0f), 0xFFFFFFFF);
 		nanosleep(&t, NULL);
 	}
 	mglw_close();

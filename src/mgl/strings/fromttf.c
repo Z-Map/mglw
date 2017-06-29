@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 20:48:33 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:30:37 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,6 @@ static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
 	size_t			i, x, y;
 	int				g, x0,y0,x1,y1, gw, gh;
 
-	printf("tw : %u\n", tw);
 	bzero(tex, tw * tw);
 	x = 0;
 	y = 0;
@@ -132,7 +131,6 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	ca.ascent = x0;
 	ca.descent = x1;
 	ca.linesize = (x0 - x1) + y0;
-	printf("asc %i desc %i lg %i\n", x0, x1, y0);
 	// Get max char bounding box
 	stbtt_GetFontBoundingBox(&font, &x0, &y0, &x1, &y1);
 	bw = (int)round((x1 - x0) * fs) + 1;
@@ -145,13 +143,11 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	else
 		texsize = (size_t)ceilf(sqrtf(
 			ceilf(len * ((float)bh / (float)bw)))) * bw;
-	printf("tex size %zi bw %i bh %i x(%i, %i) y(%i, %i)\n", texsize, bw, bh, x0, x1, y0, y1);
 	if (texsize > 8192)
 		return (clean_end_ttftoca(ca, fbuf, tex));
 	tw = 256;
 	while (tw < texsize)
 		tw *= 2;
-	printf("tw %zi\n", tw);
 	texsize = tw * tw;
 	if (!(tex = malloc(texsize)))
 		return (clean_end_ttftoca(ca, fbuf, tex));
@@ -163,8 +159,6 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	bh -= 1;
 	x = 0;
 	y = 0;
-	printf("%.3f %.3f %.3f %.3f\n", (float)(x0 * fs), (float)(x1 * fs),
-		(float)(y0 * fs), (float)(y1 * fs));
 	for (i = 0; i < len; i++)
 	{
 		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 32));
@@ -183,9 +177,6 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 			(float)gw / (float)bw,
 			(float)gh / (float)bh
 		};
-		printf("c : %c gw %i gh %i gx(%i, %i) gy(%i, %i) - metric : %.2f, %.2f, %.2f, %.2f\n",
-			(char)((int)i + 32),gw, gh, gx0, gx1, gy0, gy1,
-			ca.metrics[i].x, ca.metrics[i].y, ca.metrics[i].z, ca.metrics[i].w);
 		if ((gw > bw) || (gh > bh))
 			return (clean_end_ttftoca(ca, fbuf, tex));
 		if ((x + bw) > tw)
