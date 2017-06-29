@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/06/26 20:45:16 by qloubier         ###   ########.fr        #
+#    Updated: 2017/06/29 06:15:35 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -66,6 +66,7 @@ SRCS			=\
 	mgl/shaders.c\
 	mgl/strings/fromttf.c\
 	mgl/strings/string.c\
+	mgl/draw.c\
 
 SHADERS			= pixelbox.vert pixelbox.frag\
 	char.vert char.frag\

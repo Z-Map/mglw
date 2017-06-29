@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/27 00:34:41 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 09:33:42 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "mgl/shaders.h"
 #include "mgl/ressources/shaders/basic.h"
 #include "mgl/ressources/quads.h"
+#include "mgl/drawer.h"
 #include "mgl/strings.h"
 
 int		main()
@@ -27,6 +28,7 @@ int		main()
 	// mgltex					*ping;
 	mglca					ca;
 	mglstr					*str;
+	mglrect					rect;
 	// unsigned int			*tex;
 	// unsigned int			x,y,i;
 
@@ -55,11 +57,15 @@ int		main()
 	// 		(catex[i] << 16) | (catex[i] << 8);
 	// }
 	// }
+	rect = (mglrect){0, {280.0f, 260.0f}, {320.0f, 60.0f},
+		2.0f, 2.0f, 2.0f, 2.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
 	puts("coucou3");
 	while (mglwin_run(win))
 	{
 		mglw_setGLContext(win);
-		mgl_drawmglstr(win, str, (float[2]){300,300}, 25,(float[4]){1.0f,1.0,1.0f,1.0f});
+		mgl_drawrect(win, rect);
+		mgl_drawmglstr(win, str, (float[2]){300,300}, 25,
+			(float[4]){1.0f,1.0,1.0f,1.0f});
 		nanosleep(&t, NULL);
 	}
 	mglw_close();

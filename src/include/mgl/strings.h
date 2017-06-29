@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/29 05:02:29 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/26 11:31:54 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 06:42:05 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 # define MGL_STRINGS_H
 
 #include "mglw_intern/window.h"
+
+#include "mgl/data/vector.h"
 
 # include "mgl/data/char.h"
 # include "mgl/data/string.h"
