@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 09:33:42 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 12:17:58 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ int		main()
 	mglw_setGLContext(win);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
-	str = mgl_cstrtomglstr(&ca, "On est des malades !!", 0.1f, 0.3f);
+	str = mgl_cstrtomglstr(&ca, "agylposiKL", 0.1f, 0.3f);
 	// mglstr_auvoir(&str);
 	puts("coucou2");
 	// ca.texture = ping->texid;
@@ -57,15 +57,14 @@ int		main()
 	// 		(catex[i] << 16) | (catex[i] << 8);
 	// }
 	// }
-	rect = (mglrect){0, {280.0f, 260.0f}, {320.0f, 60.0f},
-		2.0f, 2.0f, 2.0f, 2.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
+	rect = (mglrect){0, {280.0f, 300.0f}, {320.0f, 25.0f},
+		2.0f, 2.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
 	puts("coucou3");
 	while (mglwin_run(win))
 	{
 		mglw_setGLContext(win);
 		mgl_drawrect(win, rect);
-		mgl_drawmglstr(win, str, (float[2]){300,300}, 25,
-			(float[4]){1.0f,1.0,1.0f,1.0f});
+		mgl_drawmglstr(win, str, (float[2]){300,300}, 25, 0xFFFFFFFF);
 		nanosleep(&t, NULL);
 	}
 	mglw_close();

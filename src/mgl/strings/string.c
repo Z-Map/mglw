@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/27 00:39:58 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 12:17:19 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -129,11 +129,12 @@ mglstr			*mgl_cstrtomglstr(mglca *ca, const char *str, float lsp, float space)
 }
 
 void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
-				float color[4])
+				unsigned int color)
 {
 	static mglsha	shr = (mglsha){ 0, 0, 0, 0, NULL, NULL};
 	GLint			loc;
 	int				sf, i = 94, tlvl = 0;
+	v4f				col;
 
 	if (!win || !str)
 		return ;
@@ -150,7 +151,7 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	sf = round(size);
 	glUseProgram(shr.id);
 	pos[0] = ((pos[0] / (float)(win->data->screen_w)) * 2.0f) - 1.0f;
-	pos[1] = 1.0f - ((pos[1] / (float)(win->data->screen_h)) * 2.0f);
+	pos[1] = 1.0f - (((pos[1] + size) / (float)(win->data->screen_h)) * 2.0f);
 	loc = glGetUniformLocation(shr.id, "position");
 	glUniform2fv(loc, 1, pos);
 	loc = glGetUniformLocation(shr.id, "size");
@@ -159,7 +160,8 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	pos[0] = ((size / (float)(win->data->screen_w)) * 2.0f);
 	glUniform2fv(loc, 1, pos);
 	loc = glGetUniformLocation(shr.id, "color");
-	glUniform4fv(loc, 1, color);
+	col = rgbatov4f(color);
+	glUniform4fv(loc, 1, (GLfloat *)&col);
 	// loc = glGetUniformLocation(shr.id, "texlvl");
 	while (((i /= 2) > sf) && (tlvl < 4))
 		tlvl++;

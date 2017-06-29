@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/26 17:30:03 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 11:58:29 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 12:13:51 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ static int			rect_init(GLuint *vbo, mglsha *shr)
 	return (1);
 }
 
-static v4f			rgbatov4f(unsigned int color)
+v4f				rgbatov4f(unsigned int color)
 {
 	unsigned char	*col;
 
