@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/06/29 14:43:14 by qloubier         ###   ########.fr        #
+#    Updated: 2017/06/29 15:09:30 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -104,7 +104,9 @@ else
   CDEFINES		+= -D_GLFW_COCOA -D_GLFW_USE_CHDIR -D_GLFW_USE_RETINA\
 	-D_GLFW_USE_MENUBAR
   SRCS_GLFW		+=\
-	posix_tls.c\
+	osmesa_context.c\
+	posix_thread.c\
+	egl_context.c\
 	cocoa_time.c\
 	cocoa_init.m\
 	cocoa_joystick.m\
