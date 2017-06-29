@@ -28,8 +28,6 @@
 #include <sys/param.h> // For MAXPATHLEN
 
 
-#if defined(_GLFW_USE_CHDIR)
-
 // Change to our application bundle's resources directory, if present
 //
 static void changeToResourcesDirectory(void)
@@ -65,8 +63,6 @@ static void changeToResourcesDirectory(void)
 
     chdir(resourcesPath);
 }
-
-#endif /* _GLFW_USE_CHDIR */
 
 // Create key code translation tables
 //
@@ -294,16 +290,15 @@ int _glfwPlatformInit(void)
 {
     _glfw.ns.autoreleasePool = [[NSAutoreleasePool alloc] init];
 
+    if (_glfw.hints.init.ns.chdir)
+        changeToResourcesDirectory();
+
     _glfw.ns.listener = [[GLFWLayoutListener alloc] init];
     [[NSNotificationCenter defaultCenter]
         addObserver:_glfw.ns.listener
            selector:@selector(selectedKeyboardInputSourceChanged:)
                name:NSTextInputContextKeyboardSelectionDidChangeNotification
              object:nil];
-
-#if defined(_GLFW_USE_CHDIR)
-    changeToResourcesDirectory();
-#endif
 
     createKeyTables();
 
@@ -316,12 +311,10 @@ int _glfwPlatformInit(void)
     if (!initializeTIS())
         return GLFW_FALSE;
 
-    if (!_glfwInitThreadLocalStoragePOSIX())
-        return GLFW_FALSE;
-
     _glfwInitTimerNS();
     _glfwInitJoysticksNS();
 
+    _glfwPollMonitorsNS();
     return GLFW_TRUE;
 }
 
@@ -366,7 +359,6 @@ void _glfwPlatformTerminate(void)
 
     _glfwTerminateNSGL();
     _glfwTerminateJoysticksNS();
-    _glfwTerminateThreadLocalStoragePOSIX();
 
     [_glfw.ns.autoreleasePool release];
     _glfw.ns.autoreleasePool = nil;
@@ -375,12 +367,6 @@ void _glfwPlatformTerminate(void)
 const char* _glfwPlatformGetVersionString(void)
 {
     return _GLFW_VERSION_NUMBER " Cocoa NSGL"
-#if defined(_GLFW_USE_CHDIR)
-        " chdir"
-#endif
-#if defined(_GLFW_USE_MENUBAR)
-        " menubar"
-#endif
 #if defined(_GLFW_BUILD_DLL)
         " dynamic"
 #endif

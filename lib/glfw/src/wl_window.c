@@ -249,6 +249,8 @@ static GLFWbool createShellSurface(_GLFWwindow* window)
         wl_shell_surface_set_toplevel(window->wl.shellSurface);
     }
 
+    wl_surface_commit(window->wl.surface);
+
     return GLFW_TRUE;
 }
 
@@ -393,10 +395,21 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
 
     if (ctxconfig->client != GLFW_NO_API)
     {
-        if (!_glfwInitEGL())
-            return GLFW_FALSE;
-        if (!_glfwCreateContextEGL(window, ctxconfig, fbconfig))
-            return GLFW_FALSE;
+        if (ctxconfig->source == GLFW_EGL_CONTEXT_API ||
+            ctxconfig->source == GLFW_NATIVE_CONTEXT_API)
+        {
+            if (!_glfwInitEGL())
+                return GLFW_FALSE;
+            if (!_glfwCreateContextEGL(window, ctxconfig, fbconfig))
+                return GLFW_FALSE;
+        }
+        else if (ctxconfig->source == GLFW_OSMESA_CONTEXT_API)
+        {
+            if (!_glfwInitOSMesa())
+                return GLFW_FALSE;
+            if (!_glfwCreateContextOSMesa(window, ctxconfig, fbconfig))
+                return GLFW_FALSE;
+        }
     }
 
     if (wndconfig->title)
@@ -584,6 +597,13 @@ void _glfwPlatformHideWindow(_GLFWwindow* window)
             wl_shell_surface_destroy(window->wl.shellSurface);
         window->wl.visible = GLFW_FALSE;
     }
+}
+
+void _glfwPlatformRequestWindowAttention(_GLFWwindow* window)
+{
+    // TODO
+    _glfwInputError(GLFW_PLATFORM_ERROR,
+                    "Wayland: Window attention request not implemented yet");
 }
 
 void _glfwPlatformFocusWindow(_GLFWwindow* window)

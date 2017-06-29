@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/04/04 18:33:11 by qloubier         ###   ########.fr        #
+#    Updated: 2017/06/29 14:43:14 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,8 +64,13 @@ SRCS			=\
 	image_loader.c\
 	error.c\
 	mgl/shaders.c\
+	mgl/strings/fromttf.c\
+	mgl/strings/string.c\
+	mgl/draw.c\
 
 SHADERS			= pixelbox.vert pixelbox.frag\
+	char.vert char.frag\
+	rect.vert rect.frag\
 
 SRCS_GLLOAD		= gl_load.c gl_load_cpp.cpp
 
@@ -88,9 +93,11 @@ ifeq ($(OPSYS),Linux)
 	xkb_unicode.c\
 	linux_joystick.c\
 	posix_time.c\
-	posix_tls.c\
+	null_joystick.c\
 	glx_context.c\
-	egl_context.c
+	egl_context.c\
+	posix_thread.c\
+	osmesa_context.c
   SRCS_GLLOAD	+= glx_load.c glx_load_cpp.cpp
   INT_STATIC_LF	= $(LINUXLIBS)
 else

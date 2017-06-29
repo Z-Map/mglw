@@ -45,6 +45,7 @@ extern "C" {
  *  more information.
  */
 /*! @defgroup native Native access
+ *  @brief Functions related to accessing native handles.
  *
  *  **By using the native access functions you assert that you know what you're
  *  doing and how to fix problems caused by using them.  If you don't, you
@@ -393,9 +394,9 @@ GLFWAPI MirConnection* glfwGetMirDisplay(void);
  */
 GLFWAPI int glfwGetMirMonitor(GLFWmonitor* monitor);
 
-/*! @brief Returns the `MirSurface*` of the specified window.
+/*! @brief Returns the `MirWindow*` of the specified window.
  *
- *  @return The `MirSurface*` of the specified window, or `NULL` if an
+ *  @return The `MirWindow*` of the specified window, or `NULL` if an
  *  [error](@ref error_handling) occurred.
  *
  *  @thread_safety This function may be called from any thread.  Access is not
@@ -405,7 +406,7 @@ GLFWAPI int glfwGetMirMonitor(GLFWmonitor* monitor);
  *
  *  @ingroup native
  */
-GLFWAPI MirSurface* glfwGetMirWindow(GLFWwindow* window);
+GLFWAPI MirWindow* glfwGetMirWindow(GLFWwindow* window);
 #endif
 
 #if defined(GLFW_EXPOSE_NATIVE_EGL)
@@ -463,7 +464,7 @@ GLFWAPI EGLSurface glfwGetEGLSurface(GLFWwindow* window);
  *  @param[out] buffer Where to store the address of the color buffer, or
  *  `NULL`.
  *  @return `GLFW_TRUE` if successful, or `GLFW_FALSE` if an
- *  [error](@ref error_handling) occurred.                
+ *  [error](@ref error_handling) occurred.
  *
  *  @thread_safety This function may be called from any thread.  Access is not
  *  synchronized.
@@ -484,7 +485,7 @@ GLFWAPI int glfwGetOSMesaColorBuffer(GLFWwindow* window, int* width, int* height
  *  @param[out] buffer Where to store the address of the depth buffer, or
  *  `NULL`.
  *  @return `GLFW_TRUE` if successful, or `GLFW_FALSE` if an
- *  [error](@ref error_handling) occurred.                
+ *  [error](@ref error_handling) occurred.
  *
  *  @thread_safety This function may be called from any thread.  Access is not
  *  synchronized.

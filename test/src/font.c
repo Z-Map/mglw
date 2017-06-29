@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:55 by qloubier          #+#    #+#             */
-/*   Updated: 2017/04/04 18:39:26 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:38:52 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,34 +17,38 @@
 #include "mgl/shaders.h"
 #include "mgl/ressources/shaders/basic.h"
 #include "mgl/ressources/quads.h"
+#include "mgl/drawer.h"
 #include "mgl/strings.h"
 
 int		main()
 {
-	const struct timespec	t = (struct timespec){0, 12000000L};
+	const struct timespec	t = (struct timespec){0, 120000000L};
 	mglwin					*win;
-	mglimg					*img;
+	// mglimg					*img;
+	// mgltex					*ping;
 	mglca					ca;
-	// mglimg					*pinguin;
-	unsigned int			*tex;
-	unsigned char			*catex;
+	mglstr					*str;
+	mglrect					rect;
+	// unsigned int			*tex;
 	// unsigned int			x,y,i;
 
 	if (!(mglw_init()) ||
 		!(win = mglw_openwin(
-			mglw_mkwin(MGLW_LEGACY_MODE, MGLW_2DLAYER),
+			mglw_mkwin(MGLW_LEGACY_MODE, 0),
 			800, 600, "Coucou !")))
 		return (-1);
 	mglw_setsetting(MGLWS_EXITKEY, MGLW_KEY_ESCAPE);
-	img = (mglimg *)mglw_get2dlayer(win);
-	tex = (unsigned int *)img->pixels;
-	// pinguin = mglw_loadimage("ping.jpg", MGLWI_NONE, 4);
+	// img = (mglimg *)mglw_get2dlayer(win);
+	// tex = (unsigned int *)img->pixels;
+	// bzero(tex, img->memlen);
 	//memcpy(img->pixels, pinguin->pixels, img->memlen);
+	mglw_setGLContext(win);
 	puts("coucou1");
 	ca = mgl_ttf_to_charatlas("font.ttf", NULL, 0);
-	// NOPE !! //!\\ DANGER //!\\ 
-	catex = (unsigned char *)ca.glyphs;
+	str = mgl_cstrtomglstr(&ca, "agylposiKL", 0.1f, 0.3f);
+	// mglstr_auvoir(&str);
 	puts("coucou2");
+	// ca.texture = ping->texid;
 	// for (y = 0; y < img->y; y++){
 	// for (x = 0; x < img->x; x++)
 	// {
@@ -53,9 +57,16 @@ int		main()
 	// 		(catex[i] << 16) | (catex[i] << 8);
 	// }
 	// }
+	rect = (mglrect){0, {295.0f, 300.0f}, {310.f, mgl_strsize(str, 300.0f)},
+		5.0f, 5.0f, 0.0f, 0.0f, {0.0f, 0.0f, 0.0f}, 0xFF1f356e, 0xFF0000FF, 0};
 	puts("coucou3");
 	while (mglwin_run(win))
+	{
+		mglw_setGLContext(win);
+		mgl_drawrect(win, rect);
+		mgl_drawmglstr(win, str, (float[2]){300,300}, mgl_strsize(str, 300.0f), 0xFFFFFFFF);
 		nanosleep(&t, NULL);
+	}
 	mglw_close();
 	return (0);
 }

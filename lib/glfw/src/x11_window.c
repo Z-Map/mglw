@@ -48,6 +48,8 @@
 #define Button6            6
 #define Button7            7
 
+#define _GLFW_XDND_VERSION 5
+
 
 // Wait for data to arrive using select
 // This avoids blocking other threads via the per-display Xlib lock that also
@@ -59,16 +61,19 @@ static GLFWbool waitForEvent(double* timeout)
     const int fd = ConnectionNumber(_glfw.x11.display);
     int count = fd + 1;
 
-    FD_ZERO(&fds);
-    FD_SET(fd, &fds);
 #if defined(__linux__)
-    FD_SET(_glfw.linux_js.inotify, &fds);
-
-    if (fd < _glfw.linux_js.inotify)
-        count = _glfw.linux_js.inotify + 1;
+    if (_glfw.linjs.inotify > fd)
+        count = _glfw.linjs.inotify + 1;
 #endif
     for (;;)
     {
+        FD_ZERO(&fds);
+        FD_SET(fd, &fds);
+#if defined(__linux__)
+        if (_glfw.linjs.inotify > 0)
+            FD_SET(_glfw.linjs.inotify, &fds);
+#endif
+
         if (timeout)
         {
             const long seconds = (long) *timeout;
@@ -130,7 +135,9 @@ static int getWindowState(_GLFWwindow* window)
         result = state->state;
     }
 
-    XFree(state);
+    if (state)
+        XFree(state);
+
     return result;
 }
 
@@ -410,7 +417,12 @@ static char** parseUriList(char* text, int* count)
             continue;
 
         if (strncmp(line, prefix, strlen(prefix)) == 0)
+        {
             line += strlen(prefix);
+            // TODO: Validate hostname
+            while (*line != '/')
+                line++;
+        }
 
         (*count)++;
 
@@ -566,7 +578,7 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
 
     // Declare our PID
     {
-        const pid_t pid = getpid();
+        const long pid = getpid();
 
         XChangeProperty(_glfw.x11.display,  window->x11.handle,
                         _glfw.x11.NET_WM_PID, XA_CARDINAL, 32,
@@ -614,10 +626,9 @@ static GLFWbool createNativeWindow(_GLFWwindow* window,
         XFree(hint);
     }
 
-    if (_glfw.x11.XdndAware)
+    // Announce support for Xdnd (drag and drop)
     {
-        // Announce support for Xdnd (drag and drop)
-        const Atom version = 5;
+        const Atom version = _GLFW_XDND_VERSION;
         XChangeProperty(_glfw.x11.display, window->x11.handle,
                         _glfw.x11.XdndAware, XA_ATOM, 32,
                         PropModeReplace, (unsigned char*) &version, 1);
@@ -838,7 +849,7 @@ static GLFWbool acquireMonitor(_GLFWwindow* window)
                           xpos, ypos, mode.width, mode.height);
     }
 
-    _glfwInputMonitorWindowChange(window->monitor, window);
+    _glfwInputMonitorWindow(window->monitor, window);
     return status;
 }
 
@@ -849,7 +860,7 @@ static void releaseMonitor(_GLFWwindow* window)
     if (window->monitor->window != window)
         return;
 
-    _glfwInputMonitorWindowChange(window->monitor, NULL);
+    _glfwInputMonitorWindow(window->monitor, NULL);
     _glfwRestoreVideoModeX11(window->monitor);
 
     _glfw.x11.saver.count--;
@@ -863,6 +874,37 @@ static void releaseMonitor(_GLFWwindow* window)
                         _glfw.x11.saver.blanking,
                         _glfw.x11.saver.exposure);
     }
+}
+
+// Encode a Unicode code point to a UTF-8 stream
+// Based on cutef8 by Jeff Bezanson (Public Domain)
+//
+static size_t encodeUTF8(char* s, unsigned int ch)
+{
+    size_t count = 0;
+
+    if (ch < 0x80)
+        s[count++] = (char) ch;
+    else if (ch < 0x800)
+    {
+        s[count++] = (ch >> 6) | 0xc0;
+        s[count++] = (ch & 0x3f) | 0x80;
+    }
+    else if (ch < 0x10000)
+    {
+        s[count++] = (ch >> 12) | 0xe0;
+        s[count++] = ((ch >> 6) & 0x3f) | 0x80;
+        s[count++] = (ch & 0x3f) | 0x80;
+    }
+    else if (ch < 0x110000)
+    {
+        s[count++] = (ch >> 18) | 0xf0;
+        s[count++] = ((ch >> 12) & 0x3f) | 0x80;
+        s[count++] = ((ch >> 6) & 0x3f) | 0x80;
+        s[count++] = (ch & 0x3f) | 0x80;
+    }
+
+    return count;
 }
 
 // Decode a Unicode code point from a UTF-8 stream
@@ -910,19 +952,64 @@ static void processEvent(XEvent *event)
         if (event->type == _glfw.x11.randr.eventBase + RRNotify)
         {
             XRRUpdateConfiguration(event);
-            _glfwInputMonitorChange();
+            _glfwPollMonitorsX11();
             return;
         }
     }
 
-    if (event->type != GenericEvent)
+    if (event->type == GenericEvent)
     {
-        window = findWindowByHandle(event->xany.window);
-        if (window == NULL)
+        if (_glfw.x11.xi.available)
         {
-            // This is an event for a window that has already been destroyed
-            return;
+            _GLFWwindow* window = _glfw.x11.disabledCursorWindow;
+
+            if (window &&
+                event->xcookie.extension == _glfw.x11.xi.majorOpcode &&
+                XGetEventData(_glfw.x11.display, &event->xcookie) &&
+                event->xcookie.evtype == XI_RawMotion)
+            {
+                XIRawEvent* re = event->xcookie.data;
+                if (re->valuators.mask_len)
+                {
+                    const double* values = re->raw_values;
+                    double xpos = window->virtualCursorPosX;
+                    double ypos = window->virtualCursorPosY;
+
+                    if (XIMaskIsSet(re->valuators.mask, 0))
+                    {
+                        xpos += *values;
+                        values++;
+                    }
+
+                    if (XIMaskIsSet(re->valuators.mask, 1))
+                        ypos += *values;
+
+                    _glfwInputCursorPos(window, xpos, ypos);
+                }
+            }
+
+            XFreeEventData(_glfw.x11.display, &event->xcookie);
         }
+
+        return;
+    }
+
+    if (event->type == SelectionClear)
+    {
+        handleSelectionClear(event);
+        return;
+    }
+    else if (event->type == SelectionRequest)
+    {
+        handleSelectionRequest(event);
+        return;
+    }
+
+    window = findWindowByHandle(event->xany.window);
+    if (window == NULL)
+    {
+        // This is an event for a window that has already been destroyed
+        return;
     }
 
     switch (event->type)
@@ -936,17 +1023,16 @@ static void processEvent(XEvent *event)
             if (window->x11.ic)
             {
                 // HACK: Ignore duplicate key press events generated by ibus
-                //       Corresponding release events are filtered out by the
-                //       GLFW key repeat logic
-                if (window->x11.lastKeyCode != keycode ||
-                    window->x11.lastKeyTime != event->xkey.time)
+                //       These have the same timestamp as the original event
+                //       Corresponding release events are filtered out
+                //       implicitly by the GLFW key repeat logic
+                if (window->x11.lastKeyTime < event->xkey.time)
                 {
                     if (keycode)
                         _glfwInputKey(window, key, keycode, GLFW_PRESS, mods);
-                }
 
-                window->x11.lastKeyCode = keycode;
-                window->x11.lastKeyTime = event->xkey.time;
+                    window->x11.lastKeyTime = event->xkey.time;
+                }
 
                 if (!filtered)
                 {
@@ -1165,6 +1251,8 @@ static void processEvent(XEvent *event)
                 {
                     if (_glfw.x11.disabledCursorWindow != window)
                         return;
+                    if (_glfw.x11.xi.available)
+                        return;
 
                     const int dx = x - window->x11.lastCursorPosX;
                     const int dy = y - window->x11.lastCursorPosY;
@@ -1255,44 +1343,121 @@ static void processEvent(XEvent *event)
             else if (event->xclient.message_type == _glfw.x11.XdndEnter)
             {
                 // A drag operation has entered the window
-                // TODO: Check if UTF-8 string is supported by the source
+                unsigned long i, count;
+                Atom* formats = NULL;
+                const GLFWbool list = event->xclient.data.l[1] & 1;
+
+                _glfw.x11.xdnd.source  = event->xclient.data.l[0];
+                _glfw.x11.xdnd.version = event->xclient.data.l[1] >> 24;
+                _glfw.x11.xdnd.format  = None;
+
+                if (_glfw.x11.xdnd.version > _GLFW_XDND_VERSION)
+                    return;
+
+                if (list)
+                {
+                    count = _glfwGetWindowPropertyX11(_glfw.x11.xdnd.source,
+                                                      _glfw.x11.XdndTypeList,
+                                                      XA_ATOM,
+                                                      (unsigned char**) &formats);
+                }
+                else
+                {
+                    count = 3;
+                    formats = (Atom*) event->xclient.data.l + 2;
+                }
+
+                for (i = 0;  i < count;  i++)
+                {
+                    if (formats[i] == _glfw.x11.text_uri_list)
+                    {
+                        _glfw.x11.xdnd.format = _glfw.x11.text_uri_list;
+                        break;
+                    }
+                }
+
+                if (list && formats)
+                    XFree(formats);
             }
             else if (event->xclient.message_type == _glfw.x11.XdndDrop)
             {
-                // The drag operation has finished dropping on
-                // the window, ask to convert it to a UTF-8 string
-                _glfw.x11.xdnd.source = event->xclient.data.l[0];
-                XConvertSelection(_glfw.x11.display,
-                                  _glfw.x11.XdndSelection,
-                                  _glfw.x11.UTF8_STRING,
-                                  _glfw.x11.XdndSelection,
-                                  window->x11.handle, CurrentTime);
+                // The drag operation has finished by dropping on the window
+                Time time = CurrentTime;
+
+                if (_glfw.x11.xdnd.version > _GLFW_XDND_VERSION)
+                    return;
+
+                if (_glfw.x11.xdnd.format)
+                {
+                    if (_glfw.x11.xdnd.version >= 1)
+                        time = event->xclient.data.l[2];
+
+                    // Request the chosen format from the source window
+                    XConvertSelection(_glfw.x11.display,
+                                      _glfw.x11.XdndSelection,
+                                      _glfw.x11.xdnd.format,
+                                      _glfw.x11.XdndSelection,
+                                      window->x11.handle,
+                                      time);
+                }
+                else if (_glfw.x11.xdnd.version >= 2)
+                {
+                    XEvent reply;
+                    memset(&reply, 0, sizeof(reply));
+
+                    reply.type = ClientMessage;
+                    reply.xclient.window = _glfw.x11.xdnd.source;
+                    reply.xclient.message_type = _glfw.x11.XdndFinished;
+                    reply.xclient.format = 32;
+                    reply.xclient.data.l[0] = window->x11.handle;
+                    reply.xclient.data.l[1] = 0; // The drag was rejected
+                    reply.xclient.data.l[2] = None;
+
+                    XSendEvent(_glfw.x11.display, _glfw.x11.xdnd.source,
+                               False, NoEventMask, &reply);
+                    XFlush(_glfw.x11.display);
+                }
             }
             else if (event->xclient.message_type == _glfw.x11.XdndPosition)
             {
                 // The drag operation has moved over the window
-                const int absX = (event->xclient.data.l[2] >> 16) & 0xFFFF;
-                const int absY = (event->xclient.data.l[2]) & 0xFFFF;
-                int x, y;
+                const int xabs = (event->xclient.data.l[2] >> 16) & 0xffff;
+                const int yabs = (event->xclient.data.l[2]) & 0xffff;
+                Window dummy;
+                int xpos, ypos;
 
-                _glfwPlatformGetWindowPos(window, &x, &y);
-                _glfwInputCursorPos(window, absX - x, absY - y);
+                if (_glfw.x11.xdnd.version > _GLFW_XDND_VERSION)
+                    return;
 
-                // Reply that we are ready to copy the dragged data
+                XTranslateCoordinates(_glfw.x11.display,
+                                      _glfw.x11.root,
+                                      window->x11.handle,
+                                      xabs, yabs,
+                                      &xpos, &ypos,
+                                      &dummy);
+
+                _glfwInputCursorPos(window, xpos, ypos);
+
                 XEvent reply;
                 memset(&reply, 0, sizeof(reply));
 
                 reply.type = ClientMessage;
-                reply.xclient.window = event->xclient.data.l[0];
+                reply.xclient.window = _glfw.x11.xdnd.source;
                 reply.xclient.message_type = _glfw.x11.XdndStatus;
                 reply.xclient.format = 32;
                 reply.xclient.data.l[0] = window->x11.handle;
-                reply.xclient.data.l[1] = 1; // Always accept the dnd with no rectangle
                 reply.xclient.data.l[2] = 0; // Specify an empty rectangle
                 reply.xclient.data.l[3] = 0;
-                reply.xclient.data.l[4] = _glfw.x11.XdndActionCopy;
 
-                XSendEvent(_glfw.x11.display, event->xclient.data.l[0],
+                if (_glfw.x11.xdnd.format)
+                {
+                    // Reply that we are ready to copy the dragged data
+                    reply.xclient.data.l[1] = 1; // Accept with no rectangle
+                    if (_glfw.x11.xdnd.version >= 2)
+                        reply.xclient.data.l[4] = _glfw.x11.XdndActionCopy;
+                }
+
+                XSendEvent(_glfw.x11.display, _glfw.x11.xdnd.source,
                            False, NoEventMask, &reply);
                 XFlush(_glfw.x11.display);
             }
@@ -1302,11 +1467,11 @@ static void processEvent(XEvent *event)
 
         case SelectionNotify:
         {
-            if (event->xselection.property)
+            if (event->xselection.property == _glfw.x11.XdndSelection)
             {
                 // The converted data from the drag operation has arrived
                 char* data;
-                const int result =
+                const unsigned long result =
                     _glfwGetWindowPropertyX11(event->xselection.requestor,
                                               event->xselection.property,
                                               event->xselection.target,
@@ -1324,23 +1489,26 @@ static void processEvent(XEvent *event)
                     free(paths);
                 }
 
-                XFree(data);
+                if (data)
+                    XFree(data);
 
-                XEvent reply;
-                memset(&reply, 0, sizeof(reply));
+                if (_glfw.x11.xdnd.version >= 2)
+                {
+                    XEvent reply;
+                    memset(&reply, 0, sizeof(reply));
 
-                reply.type = ClientMessage;
-                reply.xclient.window = _glfw.x11.xdnd.source;
-                reply.xclient.message_type = _glfw.x11.XdndFinished;
-                reply.xclient.format = 32;
-                reply.xclient.data.l[0] = window->x11.handle;
-                reply.xclient.data.l[1] = result;
-                reply.xclient.data.l[2] = _glfw.x11.XdndActionCopy;
+                    reply.type = ClientMessage;
+                    reply.xclient.window = _glfw.x11.xdnd.source;
+                    reply.xclient.message_type = _glfw.x11.XdndFinished;
+                    reply.xclient.format = 32;
+                    reply.xclient.data.l[0] = window->x11.handle;
+                    reply.xclient.data.l[1] = result;
+                    reply.xclient.data.l[2] = _glfw.x11.XdndActionCopy;
 
-                // Reply that all is well
-                XSendEvent(_glfw.x11.display, _glfw.x11.xdnd.source,
-                           False, NoEventMask, &reply);
-                XFlush(_glfw.x11.display);
+                    XSendEvent(_glfw.x11.display, _glfw.x11.xdnd.source,
+                               False, NoEventMask, &reply);
+                    XFlush(_glfw.x11.display);
+                }
             }
 
             return;
@@ -1434,18 +1602,6 @@ static void processEvent(XEvent *event)
             return;
         }
 
-        case SelectionClear:
-        {
-            handleSelectionClear(event);
-            return;
-        }
-
-        case SelectionRequest:
-        {
-            handleSelectionRequest(event);
-            return;
-        }
-
         case DestroyNotify:
             return;
     }
@@ -1480,9 +1636,6 @@ unsigned long _glfwGetWindowPropertyX11(Window window,
                        &itemCount,
                        &bytesAfter,
                        value);
-
-    if (type != AnyPropertyType && actualType != type)
-        return 0;
 
     return itemCount;
 }
@@ -1547,12 +1700,7 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
     Visual* visual;
     int depth;
 
-    if (ctxconfig->client == GLFW_NO_API)
-    {
-        visual = DefaultVisual(_glfw.x11.display, _glfw.x11.screen);
-        depth = DefaultDepth(_glfw.x11.display, _glfw.x11.screen);
-    }
-    else
+    if (ctxconfig->client != GLFW_NO_API)
     {
         if (ctxconfig->source == GLFW_NATIVE_CONTEXT_API)
         {
@@ -1561,13 +1709,25 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             if (!_glfwChooseVisualGLX(ctxconfig, fbconfig, &visual, &depth))
                 return GLFW_FALSE;
         }
-        else
+        else if (ctxconfig->source == GLFW_EGL_CONTEXT_API)
         {
             if (!_glfwInitEGL())
                 return GLFW_FALSE;
             if (!_glfwChooseVisualEGL(ctxconfig, fbconfig, &visual, &depth))
                 return GLFW_FALSE;
         }
+        else if (ctxconfig->source == GLFW_OSMESA_CONTEXT_API)
+        {
+            if (!_glfwInitOSMesa())
+                return GLFW_FALSE;
+        }
+    }
+
+    if (ctxconfig->client == GLFW_NO_API ||
+        ctxconfig->source == GLFW_OSMESA_CONTEXT_API)
+    {
+        visual = DefaultVisual(_glfw.x11.display, _glfw.x11.screen);
+        depth = DefaultDepth(_glfw.x11.display, _glfw.x11.screen);
     }
 
     if (!createNativeWindow(window, wndconfig, visual, depth))
@@ -1580,9 +1740,14 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
             if (!_glfwCreateContextGLX(window, ctxconfig, fbconfig))
                 return GLFW_FALSE;
         }
-        else
+        else if (ctxconfig->source == GLFW_EGL_CONTEXT_API)
         {
             if (!_glfwCreateContextEGL(window, ctxconfig, fbconfig))
+                return GLFW_FALSE;
+        }
+        else if (ctxconfig->source == GLFW_OSMESA_CONTEXT_API)
+        {
+            if (!_glfwCreateContextOSMesa(window, ctxconfig, fbconfig))
                 return GLFW_FALSE;
         }
     }
@@ -1594,7 +1759,8 @@ int _glfwPlatformCreateWindow(_GLFWwindow* window,
         if (!acquireMonitor(window))
             return GLFW_FALSE;
 
-        centerCursor(window);
+        if (wndconfig->centerCursor)
+            centerCursor(window);
     }
 
     XFlush(_glfw.x11.display);
@@ -1942,6 +2108,15 @@ void _glfwPlatformHideWindow(_GLFWwindow* window)
     XFlush(_glfw.x11.display);
 }
 
+void _glfwPlatformRequestWindowAttention(_GLFWwindow* window)
+{
+    sendEventToWM(window,
+                  _glfw.x11.NET_WM_STATE,
+                  _NET_WM_STATE_ADD,
+                  _glfw.x11.NET_WM_STATE_DEMANDS_ATTENTION,
+                  0, 1, 0);
+}
+
 void _glfwPlatformFocusWindow(_GLFWwindow* window)
 {
     if (_glfw.x11.NET_ACTIVE_WINDOW)
@@ -2042,7 +2217,9 @@ int _glfwPlatformWindowMaximized(_GLFWwindow* window)
         }
     }
 
-    XFree(states);
+    if (states)
+        XFree(states);
+
     return maximized;
 }
 
@@ -2107,6 +2284,8 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
                                           _glfw.x11.NET_WM_STATE,
                                           XA_ATOM,
                                           (unsigned char**) &states);
+        if (!states)
+            return;
 
         if (enabled)
         {
@@ -2149,8 +2328,11 @@ void _glfwPlatformSetWindowFloating(_GLFWwindow* window, GLFWbool enabled)
 
 void _glfwPlatformPollEvents(void)
 {
-    _glfwPollJoystickEvents();
+    _GLFWwindow* window;
 
+#if defined(__linux__)
+    _glfwDetectJoystickConnectionLinux();
+#endif
     int count = XPending(_glfw.x11.display);
     while (count--)
     {
@@ -2159,8 +2341,20 @@ void _glfwPlatformPollEvents(void)
         processEvent(&event);
     }
 
-    if (_glfw.x11.disabledCursorWindow)
-        centerCursor(_glfw.x11.disabledCursorWindow);
+    window = _glfw.x11.disabledCursorWindow;
+    if (window)
+    {
+        int width, height;
+        _glfwPlatformGetWindowSize(window, &width, &height);
+
+        // NOTE: Re-center the cursor only if it has moved since the last call,
+        //       to avoid breaking glfwWaitEvents with MotionNotify
+        if (window->x11.lastCursorPosX != width / 2 ||
+            window->x11.lastCursorPosY != height / 2)
+        {
+            _glfwPlatformSetCursorPos(window, width / 2, height / 2);
+        }
+    }
 
     XFlush(_glfw.x11.display);
 }
@@ -2230,6 +2424,19 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
 {
     if (mode == GLFW_CURSOR_DISABLED)
     {
+        if (_glfw.x11.xi.available)
+        {
+            XIEventMask em;
+            unsigned char mask[XIMaskLen(XI_RawMotion)] = { 0 };
+
+            em.deviceid = XIAllMasterDevices;
+            em.mask_len = sizeof(mask);
+            em.mask = mask;
+            XISetMask(mask, XI_RawMotion);
+
+            XISelectEvents(_glfw.x11.display, _glfw.x11.root, &em, 1);
+        }
+
         _glfw.x11.disabledCursorWindow = window;
         _glfwPlatformGetCursorPos(window,
                                   &_glfw.x11.restoreCursorPosX,
@@ -2244,6 +2451,18 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
     }
     else if (_glfw.x11.disabledCursorWindow == window)
     {
+        if (_glfw.x11.xi.available)
+        {
+            XIEventMask em;
+            unsigned char mask[] = { 0 };
+
+            em.deviceid = XIAllMasterDevices;
+            em.mask_len = sizeof(mask);
+            em.mask = mask;
+
+            XISelectEvents(_glfw.x11.display, _glfw.x11.root, &em, 1);
+        }
+
         _glfw.x11.disabledCursorWindow = NULL;
         XUngrabPointer(_glfw.x11.display, CurrentTime);
         _glfwPlatformSetCursorPos(window,
@@ -2257,9 +2476,6 @@ void _glfwPlatformSetCursorMode(_GLFWwindow* window, int mode)
 
 const char* _glfwPlatformGetKeyName(int key, int scancode)
 {
-    KeySym keysym;
-    int extra;
-
     if (!_glfw.x11.xkb.available)
         return NULL;
 
@@ -2269,17 +2485,19 @@ const char* _glfwPlatformGetKeyName(int key, int scancode)
     if (!_glfwIsPrintable(_glfw.x11.keycodes[scancode]))
         return NULL;
 
-    keysym = XkbKeycodeToKeysym(_glfw.x11.display, scancode, 0, 0);
+    const KeySym keysym = XkbKeycodeToKeysym(_glfw.x11.display, scancode, 0, 0);
     if (keysym == NoSymbol)
-      return NULL;
-
-    XkbTranslateKeySym(_glfw.x11.display, &keysym, 0,
-                       _glfw.x11.keyName, sizeof(_glfw.x11.keyName),
-                       &extra);
-
-    if (!strlen(_glfw.x11.keyName))
         return NULL;
 
+    const long ch = _glfwKeySym2Unicode(keysym);
+    if (ch == -1)
+        return NULL;
+
+    const size_t count = encodeUTF8(_glfw.x11.keyName, (unsigned int) ch);
+    if (count == 0)
+        return NULL;
+
+    _glfw.x11.keyName[count] = '\0';
     return _glfw.x11.keyName;
 }
 
@@ -2396,7 +2614,8 @@ const char* _glfwPlatformGetClipboardString(_GLFWwindow* window)
             _glfw.x11.clipboardString = strdup(data);
         }
 
-        XFree(data);
+        if (data)
+            XFree(data);
 
         XDeleteProperty(_glfw.x11.display,
                         event.xselection.requestor,
@@ -2428,6 +2647,8 @@ void _glfwPlatformGetRequiredInstanceExtensions(char** extensions)
 
     extensions[0] = "VK_KHR_surface";
 
+    // NOTE: VK_KHR_xcb_surface is preferred due to some early ICDs exposing but
+    //       not correctly implementing VK_KHR_xlib_surface
     if (_glfw.vk.KHR_xcb_surface && _glfw.x11.x11xcb.handle)
         extensions[1] = "VK_KHR_xcb_surface";
     else

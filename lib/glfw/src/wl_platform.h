@@ -24,9 +24,6 @@
 //
 //========================================================================
 
-#ifndef _glfw3_wayland_platform_h_
-#define _glfw3_wayland_platform_h_
-
 #include <wayland-client.h>
 #include <xkbcommon/xkbcommon.h>
 #include <xkbcommon/xkbcommon-compose.h>
@@ -46,11 +43,12 @@ typedef struct VkWaylandSurfaceCreateInfoKHR
 typedef VkResult (APIENTRY *PFN_vkCreateWaylandSurfaceKHR)(VkInstance,const VkWaylandSurfaceCreateInfoKHR*,const VkAllocationCallbacks*,VkSurfaceKHR*);
 typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR)(VkPhysicalDevice,uint32_t,struct wl_display*);
 
-#include "posix_tls.h"
+#include "posix_thread.h"
 #include "posix_time.h"
 #include "linux_joystick.h"
 #include "xkb_unicode.h"
 #include "egl_context.h"
+#include "osmesa_context.h"
 
 #include "wayland-relative-pointer-unstable-v1-client-protocol.h"
 #include "wayland-pointer-constraints-unstable-v1-client-protocol.h"
@@ -70,10 +68,6 @@ typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceWaylandPresentationSupportKHR
 #define _GLFW_PLATFORM_CONTEXT_STATE
 #define _GLFW_PLATFORM_LIBRARY_CONTEXT_STATE
 
-
-// Wayland-specific video mode data
-//
-typedef struct _GLFWvidmodeWayland _GLFWvidmodeWayland;
 
 // Wayland-specific per-window data
 //
@@ -126,10 +120,6 @@ typedef struct _GLFWlibraryWayland
     struct wl_surface*          cursorSurface;
     uint32_t                    pointerSerial;
 
-    _GLFWmonitor**              monitors;
-    int                         monitorsCount;
-    int                         monitorsSize;
-
     short int                   keycodes[256];
     short int                   scancodes[GLFW_KEY_LAST + 1];
 
@@ -155,15 +145,12 @@ typedef struct _GLFWlibraryWayland
 typedef struct _GLFWmonitorWayland
 {
     struct wl_output*           output;
-
-    _GLFWvidmodeWayland*        modes;
-    int                         modesCount;
-    int                         modesSize;
-    GLFWbool                    done;
+    int                         currentMode;
 
     int                         x;
     int                         y;
     int                         scale;
+
 } _GLFWmonitorWayland;
 
 // Wayland-specific per-cursor data
@@ -179,4 +166,3 @@ typedef struct _GLFWcursorWayland
 
 void _glfwAddOutputWayland(uint32_t name, uint32_t version);
 
-#endif // _glfw3_wayland_platform_h_

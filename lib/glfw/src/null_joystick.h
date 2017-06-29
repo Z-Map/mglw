@@ -1,7 +1,6 @@
 //========================================================================
-// GLFW 3.3 POSIX - www.glfw.org
+// GLFW 3.3 - www.glfw.org
 //------------------------------------------------------------------------
-// Copyright (c) 2002-2006 Marcus Geelnard
 // Copyright (c) 2006-2016 Camilla Löwy <elmindreda@glfw.org>
 //
 // This software is provided 'as-is', without any express or implied
@@ -25,25 +24,6 @@
 //
 //========================================================================
 
-#ifndef _glfw3_posix_tls_h_
-#define _glfw3_posix_tls_h_
+#define _GLFW_PLATFORM_JOYSTICK_STATE         int nulljs
+#define _GLFW_PLATFORM_LIBRARY_JOYSTICK_STATE int nulljs
 
-#include <pthread.h>
-
-#define _GLFW_PLATFORM_LIBRARY_TLS_STATE _GLFWtlsPOSIX posix_tls
-
-
-// POSIX-specific global TLS data
-//
-typedef struct _GLFWtlsPOSIX
-{
-    GLFWbool        allocated;
-    pthread_key_t   context;
-
-} _GLFWtlsPOSIX;
-
-
-GLFWbool _glfwInitThreadLocalStoragePOSIX(void);
-void _glfwTerminateThreadLocalStoragePOSIX(void);
-
-#endif // _glfw3_posix_tls_h_

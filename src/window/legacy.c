@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 21:24:32 by map               #+#    #+#             */
-/*   Updated: 2017/04/01 05:05:22 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/26 16:10:53 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,8 @@ int			MGLWopener_legacy(mglwin *win, int x, int y, const char *title)
 	}
 	mglw_initwin(win, x, y);
 	glGenTextures(1, win->data->draw_tex);
-	if (win->data->flags & MGLW_2DLAYER)
-	{
+	// if (win->data->flags & MGLW_2DLAYER)
+	// {
 		memcpy(vdata, &mglw_GR_quad, sizeof(float) * 12);
 		memcpy(&(vdata[12]), &(mglw_GR_quad.uvs), sizeof(float) * 8);
 		vdata[13] = 1.0f;
@@ -46,7 +46,7 @@ int			MGLWopener_legacy(mglwin *win, int x, int y, const char *title)
 		glBindBuffer(GL_ARRAY_BUFFER, win->data->l2D_buffer);
 		glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 20,
 			vdata, GL_STATIC_DRAW);
-	}
+	// }
 	return (1);
 }
 
@@ -67,6 +67,7 @@ void		MGLWimagedraw_legacy(mglwin *win, mglimg *img, int x, int y)
 	{
 		shr = drawimage2d_shader;
 		mgl_compile_shader(&shr);
+		glUseProgram(shr.id);
 		glBindAttribLocation(shr.id, 0, "v_pos");
 		glBindAttribLocation(shr.id, 1, "v_uv");
 		// glUniform1i(glGetUniformLocation(shr.id, "image" ), 0);

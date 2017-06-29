@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 04:21:10 by qloubier          #+#    #+#             */
-/*   Updated: 2017/03/06 14:36:12 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 14:42:19 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include "mglw/system.h"
 #include "mglw/window.h"
 #include "mglw/image.h"
+#include "mglw/mgl.h"
 // #include "mglw/texture.h"
 
 #endif

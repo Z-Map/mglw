@@ -25,9 +25,6 @@
 //
 //========================================================================
 
-#ifndef _glfw3_x11_platform_h_
-#define _glfw3_x11_platform_h_
-
 #include <unistd.h>
 #include <signal.h>
 #include <stdint.h>
@@ -47,6 +44,9 @@
 // The Xinerama extension provides legacy monitor indices
 #include <X11/extensions/Xinerama.h>
 
+// The XInput extension provides raw mouse motion input
+#include <X11/extensions/XInput2.h>
+
 typedef XID xcb_window_t;
 typedef XID xcb_visualid_t;
 typedef struct xcb_connection_t xcb_connection_t;
@@ -60,6 +60,11 @@ typedef Bool (* PFN_XF86VidModeGetGammaRampSize)(Display*,int,int*);
 #define XF86VidModeGetGammaRamp _glfw.x11.vidmode.GetGammaRamp
 #define XF86VidModeSetGammaRamp _glfw.x11.vidmode.SetGammaRamp
 #define XF86VidModeGetGammaRampSize _glfw.x11.vidmode.GetGammaRampSize
+
+typedef Status (* PFN_XIQueryVersion)(Display*,int*,int*);
+typedef int (* PFN_XISelectEvents)(Display*,Window,XIEventMask*,int);
+#define XIQueryVersion _glfw.x11.xi.QueryVersion
+#define XISelectEvents _glfw.x11.xi.SelectEvents
 
 typedef VkFlags VkXlibSurfaceCreateFlagsKHR;
 typedef VkFlags VkXcbSurfaceCreateFlagsKHR;
@@ -87,12 +92,17 @@ typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceXlibPresentationSupportKHR)(V
 typedef VkResult (APIENTRY *PFN_vkCreateXcbSurfaceKHR)(VkInstance,const VkXcbSurfaceCreateInfoKHR*,const VkAllocationCallbacks*,VkSurfaceKHR*);
 typedef VkBool32 (APIENTRY *PFN_vkGetPhysicalDeviceXcbPresentationSupportKHR)(VkPhysicalDevice,uint32_t,xcb_connection_t*,xcb_visualid_t);
 
-#include "posix_tls.h"
+#include "posix_thread.h"
 #include "posix_time.h"
-#include "linux_joystick.h"
 #include "xkb_unicode.h"
 #include "glx_context.h"
 #include "egl_context.h"
+#include "osmesa_context.h"
+#if defined(__linux__)
+#include "linux_joystick.h"
+#else
+#include "null_joystick.h"
+#endif
 
 #define _glfw_dlopen(name) dlopen(name, RTLD_LAZY | RTLD_LOCAL)
 #define _glfw_dlclose(handle) dlclose(handle)
@@ -128,8 +138,7 @@ typedef struct _GLFWwindowX11
     // The last position the cursor was warped to by GLFW
     int             warpCursorPosX, warpCursorPosY;
 
-    // The information from the last KeyPress event
-    unsigned int    lastKeyCode;
+    // The time of the last KeyPress event
     Time            lastKeyTime;
 
 } _GLFWwindowX11;
@@ -155,7 +164,7 @@ typedef struct _GLFWlibraryX11
     // Clipboard string (while the selection is owned)
     char*           clipboardString;
     // Key name string
-    char            keyName[64];
+    char            keyName[5];
     // X11 keycode to GLFW key LUT
     short int       keycodes[256];
     // GLFW key to X11 keycode LUT
@@ -181,6 +190,7 @@ typedef struct _GLFWlibraryX11
     Atom            NET_WM_STATE_FULLSCREEN;
     Atom            NET_WM_STATE_MAXIMIZED_VERT;
     Atom            NET_WM_STATE_MAXIMIZED_HORZ;
+    Atom            NET_WM_STATE_DEMANDS_ATTENTION;
     Atom            NET_WM_BYPASS_COMPOSITOR;
     Atom            NET_WM_FULLSCREEN_MONITORS;
     Atom            NET_ACTIVE_WINDOW;
@@ -195,9 +205,10 @@ typedef struct _GLFWlibraryX11
     Atom            XdndStatus;
     Atom            XdndActionCopy;
     Atom            XdndDrop;
-    Atom            XdndLeave;
     Atom            XdndFinished;
     Atom            XdndSelection;
+    Atom            XdndTypeList;
+    Atom            text_uri_list;
 
     // Selection (clipboard) atoms
     Atom            TARGETS;
@@ -240,7 +251,9 @@ typedef struct _GLFWlibraryX11
     } saver;
 
     struct {
+        int         version;
         Window      source;
+        Atom        format;
     } xdnd;
 
     struct {
@@ -264,6 +277,18 @@ typedef struct _GLFWlibraryX11
         PFN_XF86VidModeSetGammaRamp SetGammaRamp;
         PFN_XF86VidModeGetGammaRampSize GetGammaRampSize;
     } vidmode;
+
+    struct {
+        GLFWbool    available;
+        void*       handle;
+        int         majorOpcode;
+        int         eventBase;
+        int         errorBase;
+        int         major;
+        int         minor;
+        PFN_XIQueryVersion QueryVersion;
+        PFN_XISelectEvents SelectEvents;
+    } xi;
 
 } _GLFWlibraryX11;
 
@@ -290,6 +315,7 @@ typedef struct _GLFWcursorX11
 } _GLFWcursorX11;
 
 
+void _glfwPollMonitorsX11(void);
 GLFWbool _glfwSetVideoModeX11(_GLFWmonitor* monitor, const GLFWvidmode* desired);
 void _glfwRestoreVideoModeX11(_GLFWmonitor* monitor);
 
@@ -306,4 +332,3 @@ void _glfwInputErrorX11(int error, const char* message);
 
 void _glfwPushSelectionToManagerX11(void);
 
-#endif // _glfw3_x11_platform_h_
