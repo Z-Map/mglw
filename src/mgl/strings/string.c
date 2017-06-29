@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 14:36:28 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 18:42:51 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -164,7 +164,7 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	pos[0] = ((size / (float)(win->data->screen_w)) * 2.0f);
 	glUniform2fv(loc, 1, pos);
 	loc = glGetUniformLocation(shr.id, "color");
-	col = rgbatov4f(color);
+	col = coltov4f(color);
 	glUniform4fv(loc, 1, (GLfloat *)&col);
 	// loc = glGetUniformLocation(shr.id, "texlvl");
 	while (((i /= 2) > sf) && (tlvl < 4))

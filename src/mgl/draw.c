@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/26 17:30:03 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 14:30:59 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/06/29 18:44:45 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include "mgl/ressources/shaders/basic.h"
 #include "mgl/shaders.h"
 #include "mgl/drawer.h"
+# include "mgl/drawer.h"
 
 static int			rect_init(GLuint *vbo, mglsha *shr)
 {
@@ -119,10 +120,10 @@ void				mgl_drawrect(mglwin *win, mglrect rect)
 		vec.y = ((rect.size.y / vec.w) * -2.0f);
 	glUniform2fv(loc, 1, (GLfloat *)&vec);
 	loc = glGetUniformLocation(shr.id, "color");
-	vec = rgbatov4f(rect.color);
+	vec = coltov4f(rect.color);
 	glUniform4fv(loc, 1, (GLfloat *)&vec);
 	loc = glGetUniformLocation(shr.id, "border_color");
-	vec = rgbatov4f(rect.border_color);
+	vec = coltov4f(rect.border_color);
 	glUniform4fv(loc, 1, (GLfloat *)&vec);
 	loc = glGetUniformLocation(shr.id, "borders");
 	vec = border_calc(vec, rect);
