@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/06/22 19:20:57 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 18:42:51 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 13:04:25 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,14 +22,13 @@ static void		*clean_exit(mglstr *ms, v3f *vt, int error)
 {
 	if (vt)
 		free(vt);
-	if (error)
+	if (error && ms)
 	{
 		if (ms->vbo)
 			glDeleteBuffers(1, &(ms->vbo));
 		// if (ms->vao)
 		// 	glDeleteVertexArrays(1, &(ms->vao));
-		if (ms)
-			free(ms);
+		free(ms);
 		return (NULL);
 	}
 	return (ms);
@@ -193,4 +192,16 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
 	glUseProgram(0);
+}
+
+void		mgl_delstr(mglstr **str)
+{
+	if (!str || !(*str))
+		return ;
+	if ((*str)->vbo)
+		glDeleteBuffers(1, &((*str)->vbo));
+	// if ((*str)->vao)
+	// 	glDeleteVertexArrays(1, &((*str)->vao));
+	free(*str);
+	*str = NULL;
 }

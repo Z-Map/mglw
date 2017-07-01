@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/29 14:30:37 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 13:18:24 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 #define MGL_FILEREAD_BUFSIZE 0x10000
 
 static int		load_ttf(const char *ttfpath, stbtt_fontinfo *font,
-				unsigned char *fbuf)
+				unsigned char **fbuf)
 {
 	struct stat		ttfstat;
 	int				fd;
@@ -37,17 +37,18 @@ static int		load_ttf(const char *ttfpath, stbtt_fontinfo *font,
 	if (!fstat(fd, &ttfstat))
 	{
 		fsize = ttfstat.st_size;
-		fbuf = malloc(fsize);
-		read(fd, fbuf, fsize);
-		stbtt_InitFont(font, fbuf, stbtt_GetFontOffsetForIndex(fbuf,0));
+		*fbuf = malloc(fsize);
+		read(fd, *fbuf, fsize);
+		stbtt_InitFont(font, *fbuf, stbtt_GetFontOffsetForIndex(*fbuf,0));
 	}
 	close(fd);
-	return ((fbuf) ? 1 : 0);
+	return ((*fbuf) ? 1 : 0);
 }
 
-static mglca	clean_end_ttftoca(mglca ca, void *fbuf, void *tex)
+static mglca	*clean_end_ttftoca(mglca ca, void *fbuf, void *tex)
 {
 	void		*tmpb;
+	mglca		*ret;
 
 	if (fbuf)
 		free(fbuf);
@@ -62,17 +63,20 @@ static mglca	clean_end_ttftoca(mglca ca, void *fbuf, void *tex)
 			free(ca.texoffset);
 		ca.metrics = NULL;
 		ca.texoffset = NULL;
+		return (NULL);
 	}
+	ret = (mglca *)(&ca.metrics[ca.length]);
 	if (ca.glyphs)
 	{
-		tmpb = malloc(sizeof(int) * ca.length);
+		tmpb = (void *)(((size_t)&ca.metrics[ca.length]) + sizeof(mglca));
 		memcpy(tmpb, ca.glyphs, sizeof(int) * ca.length);
 		ca.glyphs = (unsigned int *)tmpb;
 	}
-	return (ca);
+	*ret = ca;
+	return (ret);
 }
 
-static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
+static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *ctab,
 					size_t len, float fs, unsigned int tw, v4f *texoffset)
 {
 	size_t			i, x, y;
@@ -83,7 +87,7 @@ static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
 	y = 0;
 	for (i = 0; i < len; i++)
 	{
-		g = stbtt_FindGlyphIndex(font, (chartab) ? chartab[i] : (int)i + 32);
+		g = stbtt_FindGlyphIndex(font, (ctab) ? ctab[i] : (int)i + 32);
 		stbtt_GetGlyphBitmapBox(font, g, fs, fs, &x0,&y0,&x1,&y1);
 		gw = x1 - x0;
 		gh = y1 - y0;
@@ -93,7 +97,7 @@ static void		fill_tex(stbtt_fontinfo *font, unsigned char *tex, int *chartab,
 	}
 }
 
-mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
+mglca			*mgl_ttf_to_charatlas(const char *ttfpath, int *ctab,
 					size_t len)
 {
 	mglca			ca;
@@ -111,17 +115,17 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	// Char metrics vars
 	int				x0, y0, x1, y1, gx0, gy0, gx1, gy1, gw, gh, bw, bh;
 
-	if (!chartab)
+	if (!ctab)
 		len = 95;
 	ca = (mglca){ .glyphs = NULL, .metrics = NULL, .texoffset = NULL,
 		.length = 0, .texture = 0, .vbo = 0, .box = (v2i){0,0},
 		.linesize = 0.0f};
 	if (!len)
-		return (ca);
-	ca.glyphs = (unsigned int *)chartab;
+		return (NULL);
+	ca.glyphs = (unsigned int *)ctab;
 
 	// Load the font
-	load_ttf(ttfpath, &font, fbuf);
+	load_ttf(ttfpath, &font, &fbuf);
 	// Get font size ratio for the maximum size of render :
 	//*	fixed at 102 pixels for now
 	//*	(because 1024 / 10 so ~ 100 char fill a 1k texture)
@@ -152,7 +156,8 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	if (!(tex = malloc(texsize)))
 		return (clean_end_ttftoca(ca, fbuf, tex));
 	bzero(tex, texsize);
-	if (!(ca.texoffset = malloc(sizeof(v4f) * 2 * len)))
+	if (!(ca.texoffset = malloc((sizeof(v4f) * 2 * len) + sizeof(mglca)
+		+ ((ctab) ? len * sizeof(int) : 0))))
 		return (clean_end_ttftoca(ca, fbuf, tex));
 	ca.metrics = ca.texoffset + len;
 	bw -= 1;
@@ -161,7 +166,7 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	y = 0;
 	for (i = 0; i < len; i++)
 	{
-		g = stbtt_FindGlyphIndex(&font, (chartab) ? chartab[i] : ((int)i + 32));
+		g = stbtt_FindGlyphIndex(&font, (ctab) ? ctab[i] : ((int)i + 32));
 		stbtt_GetGlyphBitmapBox(&font, g, fs, fs, &gx0, &gy0, &gx1, &gy1);
 		gw = gx1 - gx0;
 		gh = gy1 - gy0;
@@ -193,10 +198,9 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 	glGenTextures(1, &ca.texture);
 	texid = ca.texture;
 	glBindTexture(GL_TEXTURE_2D, texid);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 4);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
 		tw, tw, 0, GL_RED, GL_UNSIGNED_BYTE, tex);
 	i = 96;
@@ -209,11 +213,10 @@ mglca			mgl_ttf_to_charatlas(const char *ttfpath, int *chartab,
 		bw = (int)round((x1 - x0) * fs);
 		bh = (int)round((y1 - y0) * fs);
 		tw /= 2;
-		fill_tex(&font, tex, chartab, len, fs, tw, ca.texoffset);
+		fill_tex(&font, tex, ctab, len, fs, tw, ca.texoffset);
 		glTexImage2D(GL_TEXTURE_2D, x++, GL_RED,
 			tw, tw, 0, GL_RED, GL_UNSIGNED_BYTE, tex);
 	}
-	(void)fill_tex;
 	glBindTexture(GL_TEXTURE_2D, 0);
 	ca.length = len;
 	return (clean_end_ttftoca(ca, fbuf, tex));
@@ -250,4 +253,16 @@ mglca			*mgl_charatlas_loadbuffer(mglca *ca)
 	glBufferData(GL_ARRAY_BUFFER, i, vt, GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	return (ca);
+}
+
+void		mgl_delcharatlas(mglca **ca)
+{
+	if (!ca || !(*ca) || !((*ca)->texoffset))
+		return ;
+	if ((*ca)->vbo)
+		glDeleteBuffers(1, &((*ca)->vbo));
+	if ((*ca)->texture)
+		glDeleteTextures(1, &((*ca)->texture));
+	free((*ca)->texoffset);
+	*ca = NULL;
 }

@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/07/01 12:32:16 by qloubier         ###   ########.fr        #
+#    Updated: 2017/07/01 13:08:14 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ PROJECTPATH		= $(CURDIR)
 SILENT			= @
 MGLWFLAGS		= -Wall -Wpadded -Wextra -Werror
 CFLAGS			=
+CONLYFLAGS		=
 ARFLAGS			= -rcs
 CDEFINES		=
 OSXLIBS			= -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo
@@ -122,7 +123,8 @@ ifndef config
   config		= release
 endif
 ifeq ($(config),debug)
-  CFLAGS		+= -O1 -g -fsanitize=address
+  CFLAGS		+= -O1
+  CONLYFLAGS	+= -g -fsanitize=address
 endif
 ifeq ($(config),release)
   CFLAGS		+= -Ofast
@@ -152,7 +154,7 @@ INT_MOBJ		= $(addprefix $(INT_BD)/, $(subst /,~,$(INT_MSRCS:%.m=%.o)))
 
 INT_ALLOBJ		= $(INT_COBJ) $(INT_CXXOBJ) $(INT_MOBJ) $(INT_MGLWOBJ)
 
-INT_CFLAG		= $(CFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
+INT_CFLAG		= $(CFLAGS) $(CONLYFLAGS) $(MGLWFLAGS) $(INT_INCFLAGS)
 INT_LCFLAG		= $(CFLAGS) $(LIB_CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 INT_CXXFLAG		= $(CFLAGS) $(CDEFINES) $(INT_INCFLAGS)
 
