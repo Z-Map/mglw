@@ -6,7 +6,7 @@
 #    By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2016/03/03 18:39:00 by qloubier          #+#    #+#              #
-#    Updated: 2017/06/29 15:09:30 by qloubier         ###   ########.fr        #
+#    Updated: 2017/07/01 12:32:16 by qloubier         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -53,6 +53,7 @@ SRCS			=\
 	system/ilst.c\
 	window.c\
 	window/event.c\
+	window/tools.c\
 	window/layer.c\
 	window/legacy.c\
 	window/opengl3.c\

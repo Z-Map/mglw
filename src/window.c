@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:38 by qloubier          #+#    #+#             */
-/*   Updated: 2017/06/08 22:58:11 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 12:20:58 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ mglwin		*mglw_mkwin(mglw_m mode, mglw_f flags)
 		.win_x = 0, .win_y = 0,
 		.win_w = sys->settings[MGLWS_DEFAULT_WWIDTH],
 		.win_h = sys->settings[MGLWS_DEFAULT_WHEIGHT],
+		.min_w = GLFW_DONT_CARE, .min_h = GLFW_DONT_CARE,
+		.max_w = GLFW_DONT_CARE, .max_h = GLFW_DONT_CARE,
 		.window = NULL,
 		.flags = flags & MGLW_WINDATAFLAGS,
 		.layer2D = NULL, .draw_vao = 0,
@@ -115,6 +117,8 @@ mglwin		*mglw_openwin(mglwin *win, int x, int y, const char *title)
 	win->data->win_h = h;
 	win->data->screen_w = w;
 	win->data->screen_h = h;
+	glfwSetWindowSizeLimits(win->data->window, win->data->min_w,
+		win->data->min_h, win->data->max_w, win->data->max_h);
 	glfwFocusWindow(win->data->window);
 	return (win);
 }

@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 13:49:08 by qloubier          #+#    #+#             */
-/*   Updated: 2017/04/01 00:44:44 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 10:54:22 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,10 @@ struct			mglw_win_data
 	int				win_h;
 	int				screen_w;
 	int				screen_h;
+	int				min_w;
+	int				min_h;
+	int				max_w;
+	int				max_h;
 	GLFWwindow		*window;
 	mglw_f			flags;
 	unsigned int	padding;

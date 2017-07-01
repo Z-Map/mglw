@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 14:34:49 by qloubier          #+#    #+#             */
-/*   Updated: 2017/03/14 16:47:27 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 11:55:27 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,9 @@ mglwin		*mglwin_shouldclose(mglwin *win);
 
 mglwin		*mglw_setGLContext(mglwin *win);
 mglwin		*mglw_togglefullscreen(mglwin *win, int fullres);
+mglwin		*mglw_minsize(mglwin *win, int w, int h);
+mglwin		*mglw_maxsize(mglwin *win, int w, int h);
+mglwin		*mglw_limits(mglwin *win, int mi_w, int mi_h, int ma_w, int ma_h);
 mglwin		*mglw_draw_itow(mglwin *win, mglimg *img, int x, int y);
 
 /* MiniGLwin Window attributes access */
