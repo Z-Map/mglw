@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/01 08:49:30 by qloubier          #+#    #+#             */
-/*   Updated: 2017/07/01 13:18:24 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/02 16:37:22 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,7 +125,8 @@ mglca			*mgl_ttf_to_charatlas(const char *ttfpath, int *ctab,
 	ca.glyphs = (unsigned int *)ctab;
 
 	// Load the font
-	load_ttf(ttfpath, &font, &fbuf);
+	if (!load_ttf(ttfpath, &font, &fbuf))
+		return (clean_end_ttftoca(ca, fbuf, tex));
 	// Get font size ratio for the maximum size of render :
 	//*	fixed at 102 pixels for now
 	//*	(because 1024 / 10 so ~ 100 char fill a 1k texture)
