@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/22 04:05:38 by qloubier          #+#    #+#             */
-/*   Updated: 2017/07/01 12:20:58 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 14:47:18 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,7 @@ mglwin		*mglw_initwin(mglwin *win, int x, int y)
 	win->data->state |= 1;
 	glfwSetWindowUserPointer(win->data->window, win->data);
 	glfwSetKeyCallback(win->data->window, &MGLWkeyprocess);
+	glfwSetCharCallback(win->data->window, &MGLWtextprocess);
 	glfwSetMouseButtonCallback(win->data->window, &MGLWmousebuttonprocess);
 	glfwSetCursorPosCallback(win->data->window, &MGLWmouseprocess);
 	glfwSetScrollCallback(win->data->window, &MGLWmousewheelprocess);

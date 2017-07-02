@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 13:49:08 by qloubier          #+#    #+#             */
-/*   Updated: 2017/07/01 10:54:22 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 14:44:48 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,8 @@ struct			mglw_win_data
 	double			optime;
 	void			*kcb[3];
 	void			*kcb_args[3];
+	void			*tcb;
+	void			*tcb_arg;
 	void			*mcb[2];
 	void			*mcb_args[2];
 	void			*sizecb;

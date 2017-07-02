@@ -6,7 +6,7 @@
 /*   By: qloubier <qloubier@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/12/21 14:34:49 by qloubier          #+#    #+#             */
-/*   Updated: 2017/07/01 11:55:27 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 14:39:48 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ mglwin		*mglw_draw_itow(mglwin *win, mglimg *img, int x, int y);
 
 mgltex		*mglw_get2dlayer(mglwin *win);
 mglwin		*mglw_setkcb(mglwin *win, int s, int (*f)(void *, int), void *a);
+mglwin		*mglw_settcb(mglwin *win, int (*f)(void *, unsigned int), void *a);
 mglwin		*mglw_setsizecb(mglwin *win, void (*f)(void *, int, int), void *a);
 mglwin		*mglw_setmcb(mglwin *win, int s,
 				int (*f)(void *, double, double), void *a);

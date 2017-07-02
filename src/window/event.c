@@ -6,7 +6,7 @@
 /*   By: map <map@student.42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/18 21:59:43 by map               #+#    #+#             */
-/*   Updated: 2017/06/08 22:38:51 by qloubier         ###   ########.fr       */
+/*   Updated: 2017/07/01 14:45:09 by qloubier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 
 mglwin		*mglw_setsizecb(mglwin *win, void (*f)(void *, int, int), void *arg)
 {
+	if (!win)
+		return (NULL);
 	win->data->sizecb = f;
 	win->data->sizecb_arg = arg;
 	return (win);
@@ -22,6 +24,8 @@ mglwin		*mglw_setsizecb(mglwin *win, void (*f)(void *, int, int), void *arg)
 
 mglwin		*mglw_setmcb(mglwin *win, int s, int (*f)(void *, double, double), void *arg)
 {
+	if (!win)
+		return (NULL);
 	if (s)
 	{
 		win->data->mcb[1] = f;
@@ -37,6 +41,8 @@ mglwin		*mglw_setmcb(mglwin *win, int s, int (*f)(void *, double, double), void 
 
 mglwin		*mglw_setkcb(mglwin *win, int s, int (*f)(void *, int), void *arg)
 {
+	if (!win)
+		return (NULL);
 	if (s == GLFW_RELEASE)
 	{
 		win->data->kcb[0] = f;
@@ -52,6 +58,15 @@ mglwin		*mglw_setkcb(mglwin *win, int s, int (*f)(void *, int), void *arg)
 		win->data->kcb[2] = f;
 		win->data->kcb_args[2] = arg;
 	}
+	return (win);
+}
+
+mglwin		*mglw_settcb(mglwin *win, int (*f)(void *, unsigned int), void *a)
+{
+	if (!win)
+		return (NULL);
+	win->data->tcb = f;
+	win->data->tcb_arg = a;
 	return (win);
 }
 
@@ -126,6 +141,18 @@ void		MGLWkeyprocess(GLFWwindow *win, int k, int sc, int s, int m)
 		|| ((kcb) && ((ret = kcb(wdata->kcb_args[s], k) < 0))))
 		glfwSetWindowShouldClose(win, GLFW_TRUE);
 }
+
+void		MGLWtextprocess(GLFWwindow *win, unsigned int c)
+{
+	mglw_wd *const	wdata = (mglw_wd *)glfwGetWindowUserPointer(win);
+	int				(*tcb)(void *, unsigned int) = wdata->tcb;
+	int				ret;
+
+	ret = -1;
+	if ((tcb) && ((ret = tcb(wdata->tcb_arg, c) < 0)))
+		glfwSetWindowShouldClose(win, GLFW_TRUE);
+}
+
 
 mglwin		*mglwin_shouldclose(mglwin *win)
 {
