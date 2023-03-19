@@ -25,6 +25,9 @@ DEFLST = GL_RED \
 	GL_UNSIGNED_INT \
 	GL_FLOAT
 
+TARGETDIR	= .
+SILENT		= @
+
 .PHONY: hfile
 
 all: hfile
@@ -34,4 +37,4 @@ hfile:
 	$(MAKE) $(DEFLST)
 
 $(DEFLST):
-	@grep -h " $@ " ../lib/glload/include/glload/*.h >> mglw_gldef.h
+	$(SILENT)grep -h " $@ " ../lib/glload/include/glload/*.h >> $(TARGETDIR)/mglw_gldef.h

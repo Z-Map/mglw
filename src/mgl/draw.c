@@ -54,10 +54,10 @@ v4f				coltov4f(unsigned int color)
 
 static v4f			border_calc(v4f vec, mglrect rect)
 {
-	v2f				ws;
+	//v2f				ws;
 	v2f				rs;
 
-	ws = (v2f){vec.x, vec.y};
+	//ws = (v2f){vec.x, vec.y};
 	rs.x = rect.size.x * 0.5f;
 	rs.y = rect.size.y * 0.5f;
 	if (rect.border_left < 1.0f)
@@ -139,6 +139,9 @@ void				mgl_drawrect(mglwin *win, mglrect rect)
 	glDrawArrays(GL_TRIANGLE_FAN, 0, 12);
 	glDisableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-non-prototype"
+	glPopAttrib(GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+#pragma GCC diagnostic pop
 	glUseProgram(0);
 }

@@ -17,9 +17,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpadded"
 #include "glload/gl_all.h"
 #include "glload/gl_load.h"
 #include "GLFW/glfw3.h"
+#pragma GCC diagnostic pop
 
 #include "mglw/mglw_proto.h"
 

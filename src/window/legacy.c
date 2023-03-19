@@ -97,7 +97,10 @@ void		MGLWimagedraw_legacy(mglwin *win, mglimg *img, int x, int y)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisableVertexAttribArray(0);
-	glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-non-prototype"
+	glPopAttrib(GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+#pragma GCC diagnostic pop
 	glUseProgram(0);
 }
 
@@ -116,7 +119,10 @@ void		MGLWdrawer_legacy(mglwin *win)
 		// glPixelZoom(1.0f, -1.0f);
 		// glDrawPixels(layer->x, layer->y,
 		// 	layer->format, layer->type, layer->pixels);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-non-prototype"
 		// glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+#pragma GCC diagnostic pop
 	}
 }
 

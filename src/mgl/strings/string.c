@@ -191,6 +191,9 @@ void		mgl_drawmglstr(mglwin *win, mglstr *str, float pos[2], float size,
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(1);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glPopAttrib(GL_COLOR_BUFFER_BIT|GL_CURRENT_BIT);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-non-prototype"
+	glPopAttrib(GL_COLOR_BUFFER_BIT | GL_CURRENT_BIT);
+#pragma GCC diagnostic pop
 	glUseProgram(0);
 }
